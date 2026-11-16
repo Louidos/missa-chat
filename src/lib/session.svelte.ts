@@ -51,6 +51,12 @@ class Session {
   #apiKey: string | null = null;
   #pin: string | null = null;
   #pinFailures = 0;
+  #onReset: Array<() => void> = [];
+
+  /** Wird bei Abmelden und Sperren aufgerufen (z. B. laufende Antwort stoppen). */
+  onReset(fn: () => void): void {
+    this.#onReset.push(fn);
+  }
 
   get hasPin(): boolean {
     return this.connection?.key.type === 'pin';
@@ -98,6 +104,7 @@ class Session {
   /** Sperrt die App wieder (Key wird aus dem Speicher entfernt). */
   lock(): void {
     if (!this.hasPin) return;
+    for (const fn of this.#onReset) fn();
     this.#apiKey = null;
     this.#pin = null;
     this.link = 'unknown';
@@ -192,6 +199,7 @@ class Session {
 
   /** Abmelden: löscht Key, Einstellungen und Verlauf. */
   async logout(): Promise<void> {
+    for (const fn of this.#onReset) fn();
     await wipeAll();
     this.#apiKey = null;
     this.#pin = null;

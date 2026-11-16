@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import ConnectForm from './components/ConnectForm.svelte';
-  import HomeView from './components/HomeView.svelte';
+  import ChatView from './components/ChatView.svelte';
   import SettingsView from './components/SettingsView.svelte';
   import UnlockView from './components/UnlockView.svelte';
   import { session } from './lib/session.svelte';
@@ -44,5 +44,5 @@
     }}
   />
 {:else}
-  <HomeView {notice} onsettings={() => ((notice = ''), (view = 'settings'))} />
+  <ChatView {notice} onsettings={() => ((notice = ''), (view = 'settings'))} />
 {/if}

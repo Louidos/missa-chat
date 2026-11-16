@@ -22,9 +22,35 @@ Erlaubt sind nur `https://`-Adressen. Ausnahme: `http://localhost` zum Entwickel
 | Der Server ist nicht erreichbar           | Adresse prüfen, läuft Missa / rp01?                                       |
 | … blockiert die Antwort (CORS)            | rp01 muss die App-Adresse freigeben, siehe [caddy-cors.md](caddy-cors.md) |
 | Die Adresse muss mit https:// beginnen    | `http://` ist nur für localhost erlaubt                                   |
-| Keine Missa-API (/v1/models nicht gefunden) | Adresse stimmt nicht (falscher Pfad?)                                   |
+| Keine Missa-API (Endpunkt nicht gefunden) | Adresse stimmt nicht (falscher Pfad?)                                     |
 | Server-Fehler                             | missa-core hat einen Fehler gemeldet, später nochmal                      |
 | Dieses Gerät ist gerade offline           | Internetverbindung prüfen                                                 |
+
+## Chatten
+
+- **Senden:** Enter. **Neue Zeile:** Shift+Enter. Das Eingabefeld wächst mit.
+- Missas Antwort erscheint **Wort für Wort**. Bis das erste Wort da ist, tippen drei Punkte.
+- **Stopp** (oder **Esc**) bricht die Antwort ab. Der bisherige Text bleibt stehen
+  und ist mit „Abgebrochen.“ markiert.
+- **Neu erzeugen** (unter Missas letzter Antwort) verwirft sie und fragt neu.
+- **Bearbeiten** (unter deiner letzten Nachricht) holt sie ins Eingabefeld. „Neu senden“
+  ersetzt sie samt Antwort. Esc bricht das Bearbeiten ab.
+- **Kopieren** gibt es unter jeder Nachricht und oben an jedem Codeblock.
+- Reisst die Verbindung **mitten in der Antwort** ab, bleibt der empfangene Teil stehen,
+  mit Hinweis und Knopf **„Nochmal“**.
+- Wer **nach oben scrollt**, wird von neuen Wörtern nicht zurückgerissen. Der Knopf
+  **„↓ Nach unten“** springt wieder ans Ende.
+- Der Verlauf wird lokal gespeichert und übersteht Neuladen. Mehrere Gespräche kommen
+  mit einer späteren Version.
+
+### Darstellung von Missas Antworten
+
+Antworten werden als Markdown dargestellt (Listen, Tabellen, Links, Code). Code wird
+lokal hervorgehoben (highlight.js, mitgebaut). Weil Antworten **fremder Inhalt** sind,
+werden sie nach dem Rendern mit DOMPurify bereinigt: kein `<script>`, keine
+Event-Handler, keine Formulare oder iframes, keine `javascript:`-Links. Links öffnen in
+einem neuen Tab ohne Referrer. Bilder von fremden Servern werden nicht geladen (sie
+könnten verraten, dass und wann du eine Antwort liest).
 
 ## PIN-Sperre
 

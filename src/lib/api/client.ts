@@ -15,14 +15,26 @@ export interface RequestOptions {
   signal?: AbortSignal;
   /** Zeitlimit in Millisekunden (Standard 10 s). */
   timeoutMs?: number;
+  /** Zeitlimit nur bis zum Eintreffen der Antwort-Header (für Streaming). */
+  timeoutOnlyUntilResponse?: boolean;
 }
 
 const DEFAULT_TIMEOUT = 10_000;
 
-function combinedSignal(opts: RequestOptions): { signal: AbortSignal; timeout: AbortSignal } {
+function combinedSignal(opts: RequestOptions): {
+  signal: AbortSignal;
+  timeout: AbortSignal;
+  clearTimeout: () => void;
+} {
+  if (opts.timeoutOnlyUntilResponse) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? DEFAULT_TIMEOUT);
+    const signal = opts.signal ? AbortSignal.any([opts.signal, ctrl.signal]) : ctrl.signal;
+    return { signal, timeout: ctrl.signal, clearTimeout: () => clearTimeout(timer) };
+  }
   const timeout = AbortSignal.timeout(opts.timeoutMs ?? DEFAULT_TIMEOUT);
   const signal = opts.signal ? AbortSignal.any([opts.signal, timeout]) : timeout;
-  return { signal, timeout };
+  return { signal, timeout, clearTimeout: () => {} };
 }
 
 /** Gemeinsame Anfrage-Einstellungen: keine Cookies, kein Referrer, kein Cache. */
@@ -59,7 +71,7 @@ export async function apiFetch(
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     throw new ApiError('offline');
   }
-  const { signal, timeout } = combinedSignal(init);
+  const { signal, timeout, clearTimeout: stopTimer } = combinedSignal(init);
   const url = `${baseUrl}${path}`;
   const headers = new Headers(init.headers);
   headers.set('Authorization', `Bearer ${key}`);
@@ -74,12 +86,14 @@ export async function apiFetch(
       headers,
     });
   } catch {
-    if (timeout.aborted) throw new ApiError('timeout');
+    stopTimer();
     if (init.signal?.aborted) throw new ApiError('aborted');
+    if (timeout.aborted) throw new ApiError('timeout');
     const probe = AbortSignal.timeout(5_000);
     throw new ApiError((await probeReachable(url, probe)) ? 'cors' : 'unreachable');
   }
 
+  stopTimer();
   if (res.status === 401 || res.status === 403) throw new ApiError('unauthorized', res.status);
   if (res.status === 404) throw new ApiError('not-found', res.status);
   if (!res.ok) throw new ApiError('server', res.status);

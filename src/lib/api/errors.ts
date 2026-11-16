@@ -13,7 +13,8 @@ export type ApiErrorKind =
   | 'not-found'
   | 'server'
   | 'bad-response'
-  | 'aborted';
+  | 'aborted'
+  | 'interrupted';
 
 export const CORS_DOC = 'docs/caddy-cors.md';
 
@@ -28,10 +29,11 @@ const MESSAGES: Record<ApiErrorKind, string> = {
   timeout: 'Der Server antwortet nicht (Zeitüberschreitung). Läuft Missa gerade?',
   cors: `Der Server ist erreichbar, aber der Browser blockiert die Antwort (CORS). Auf dem Proxy muss die Adresse dieser App freigegeben werden – Anleitung in ${CORS_DOC}.`,
   'not-found':
-    'Unter dieser Adresse gibt es keine Missa-API (/v1/models nicht gefunden). Stimmt die Adresse?',
+    'Unter dieser Adresse gibt es keine Missa-API (Endpunkt nicht gefunden). Stimmt die Adresse?',
   server: 'Missa hat einen Server-Fehler gemeldet. Bitte später nochmal versuchen.',
   'bad-response': 'Der Server hat unerwartet geantwortet. Ist das wirklich die Missa-API?',
   aborted: 'Abgebrochen.',
+  interrupted: 'Die Antwort wurde unterbrochen – die Verbindung ist mitten drin abgerissen.',
 };
 
 export class ApiError extends Error {
