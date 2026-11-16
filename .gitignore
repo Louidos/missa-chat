@@ -1,0 +1,23 @@
+# Abhängigkeiten und Build
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Tests
+test-results/
+playwright-report/
+blob-report/
+coverage/
+
+# Geheimnisse – nie committen
+.env
+.env.*
+!.env.example
+
+# Editor / System
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log
