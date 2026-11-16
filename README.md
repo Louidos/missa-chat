@@ -5,6 +5,10 @@ API-Adresse und Key eingeben, und man hat ein schönes Chat-Fenster. Die ganze L
 bleibt auf dem Server (missa-core). Läuft im Browser am Laptop und lässt sich auf dem
 Handy als PWA installieren.
 
+Zu Missa gehören drei Repos: [Missa-Core](https://github.com/Louidos/Missa-Core) (Missa selbst, die
+ganze Logik und die API), [missa-control](https://github.com/Louidos/missa-control) (Admin-Panel)
+und **missa-chat** (diese App). Wie die App aufgebaut ist: [docs/architektur.md](docs/architektur.md).
+
 **Version:** 0.0.0 (noch in Entwicklung, noch keine veröffentlichte Version)
 
 ## Grundsätze
@@ -36,7 +40,8 @@ einen Mock-Server:
 npm run mock-api
 ```
 
-Er läuft unter <http://localhost:8787>, gültiger Key: `test-key-123`.
+Er läuft unter <http://localhost:8787>, gültiger Key: `test-key-123`. Optionen und alles
+Weitere zur Entwicklung: [docs/entwicklung.md](docs/entwicklung.md).
 
 ## Prüfen und bauen
 
@@ -53,11 +58,11 @@ npm run test:e2e  # Ende-zu-Ende-Tests (Playwright, mit Mock-API)
 | ------------------ | ------------------------------------------------------------ |
 | `src/`             | Code der App (Komponenten, Speicher)                         |
 | `src/lib/api/`     | Anbindung an die Missa-API – einzige Stelle mit Serverkontakt |
-| `public/`          | statische Dateien (Icons, Manifest, Platzhalter-Avatar)      |
+| `public/`          | statische Dateien (heute `favicon.svg`; Icons und Manifest folgen mit der PWA) |
 | `tests/unit/`      | Unit-Tests (Vitest)                                          |
 | `tests/e2e/`       | Ende-zu-Ende-Tests (Playwright)                              |
 | `tests/mock-api/`  | Mock-Server, der die Missa-API nachahmt (inkl. Streaming)    |
-| `docs/`            | Doku (Installation, Hosting, Caddy/CORS, Bedienung)          |
+| `docs/`            | Doku (Bedienung, Caddy/CORS, Architektur, Entwicklung)       |
 | `deploy/`          | Webserver-Konfiguration zum Ausliefern der fertigen App      |
 
 Im Hauptordner liegen neben README, CHANGELOG und LICENSE nur die Projektdateien, die
@@ -72,6 +77,15 @@ PIN-Sperre. Details: [docs/bedienung.md](docs/bedienung.md).
 
 Damit der Browser die API ansprechen darf, muss rp01 CORS für die App-Adresse
 freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
+
+## Dokumentation
+
+| Thema | Dokument |
+| --- | --- |
+| Verbinden, PIN-Sperre, Einstellungen, Meldungen | [docs/bedienung.md](docs/bedienung.md) |
+| CORS auf rp01 (Caddy) freigeben | [docs/caddy-cors.md](docs/caddy-cors.md) |
+| Aufbau: Bausteine, Zustände, Verbindung, Speicher, Sicherheit | [docs/architektur.md](docs/architektur.md) |
+| Entwicklung: Mock-API, Prüfen, Tests, Regeln für neuen Code | [docs/entwicklung.md](docs/entwicklung.md) |
 
 ## Projektstand
 
