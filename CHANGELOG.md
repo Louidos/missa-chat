@@ -7,6 +7,8 @@ die Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
 ## Unveröffentlicht
 
+## 0.2.0 – 2026-11-16
+
 ### Hinzugefügt
 
 - App lässt sich installieren, startet offline und sendet Nachrichten nach, sobald die Verbindung zurück ist: Statusanzeige (verbunden / offline / Server nicht erreichbar), sichtbare und einzeln löschbare Warteschlange, Hinweis „Neue Version verfügbar“ und fertige Docker-Auslieferung in `deploy/` (#9)
