@@ -36,7 +36,9 @@ einen Mock-Server:
 npm run mock-api
 ```
 
-Er läuft unter <http://localhost:8787>, gültiger Key: `test-key-123`.
+Er läuft unter <http://localhost:8787>, gültiger Key: `test-key-123`. Mit `#code`,
+`#lang`, `#abbruch`, `#fehler` oder `#xss` in der Nachricht lassen sich Sonderfälle
+ausprobieren (siehe Kopf von `tests/mock-api/server.mjs`).
 
 ## Prüfen und bauen
 
@@ -70,13 +72,16 @@ Beim ersten Start fragt die App nach API-Adresse und Key, prüft die Verbindung 
 `GET /v1/models` und speichert erst dann. Optional: zweite Adresse fürs Heimnetz und
 PIN-Sperre. Details: [docs/bedienung.md](docs/bedienung.md).
 
+Danach öffnet sich das Chat-Fenster: Enter sendet, Shift+Enter macht eine neue Zeile,
+Missas Antwort erscheint Wort für Wort, **Stopp** oder **Esc** bricht ab.
+
 Damit der Browser die API ansprechen darf, muss rp01 CORS für die App-Adresse
 freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
 
 ## Projektstand
 
 - [x] Verbindung einrichten (Adresse, Key, Prüfung, Heimnetz-Adresse, PIN-Sperre)
-- [ ] Chat-Fenster mit Streaming
+- [x] Chat-Fenster mit Streaming, Stopp, Neu erzeugen, Bearbeiten, Markdown und Code-Hervorhebung
 - [ ] Installierbar & offline-fest (PWA)
 - [ ] Missas Look
 - [ ] Verlauf, Suche, Export

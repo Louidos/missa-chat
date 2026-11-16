@@ -7,13 +7,13 @@
 <div class="status" role="status" aria-live="polite" data-status={session.link}>
   <span class="dot" aria-hidden="true"></span>
   {#if session.link === 'checking'}
-    Verbinde …
+    <span>Verbinde …</span>
   {:else if session.link === 'connected'}
     <span>Verbunden · <strong>{session.connection?.model}</strong> · {kindLabel}</span>
   {:else if session.link === 'error'}
-    Nicht verbunden
+    <span>Nicht verbunden</span>
   {:else}
-    Unbekannt
+    <span>Unbekannt</span>
   {/if}
 </div>
 
@@ -27,6 +27,13 @@
     border-radius: 999px;
     background: var(--surface-2);
     justify-self: start;
+    min-width: 0;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+  .status > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .dot {
     flex: none;

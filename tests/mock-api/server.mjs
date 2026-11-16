@@ -9,6 +9,13 @@
  *   POST /v1/chat/completions    – Antwort, mit stream: true als Server-Sent Events
  *
  * Gültiger Key: MOCK_API_KEY (Standard: "test-key-123").
+ *
+ * Test-Schalter in der letzten Nutzernachricht:
+ *   #code     – Antwort mit Python-Codeblock
+ *   #xss      – Antwort mit <script>, onerror und javascript:-Link (darf nie laufen)
+ *   #lang     – lange, langsame Antwort (für Stopp und Scrollen)
+ *   #abbruch  – Verbindung bricht mitten in der Antwort ab
+ *   #fehler   – Server antwortet mit 500
  * CORS wie in docs/caddy-cors.md beschrieben: OPTIONS ohne Key, alles andere mit Key.
  */
 import http from 'node:http';
@@ -52,9 +59,31 @@ function readBody(req) {
   });
 }
 
-function replyFor(messages) {
+function lastUserText(messages) {
   const last = [...(messages || [])].reverse().find((m) => m.role === 'user');
-  const text = typeof last?.content === 'string' ? last.content : '';
+  return typeof last?.content === 'string' ? last.content : '';
+}
+
+function replyFor(text) {
+  if (text.includes('#code')) {
+    return 'Hier ein Beispiel:\n\n```python\ndef hallo(name):\n    return f"Hallo {name}!"\n```\n\nViel Spass!';
+  }
+  if (text.includes('#xss')) {
+    return [
+      'Achtung, fremder Inhalt:',
+      '<script>window.__pwned = "script"</script>',
+      '<img src="x" onerror="window.__pwned = \'img\'">',
+      '[Klick mich](javascript:window.__pwned=%22link%22)',
+      '<a href="#" onclick="window.__pwned=\'a\'">Link</a>',
+      'Ende.',
+    ].join('\n\n');
+  }
+  if (text.includes('#lang')) {
+    return Array.from({ length: 120 }, (_, i) => `Wort${i + 1}`).join(' ') + ' ENDE';
+  }
+  if (text.includes('#abbruch')) {
+    return 'Das ist der Anfang einer Antwort, die gleich abbricht';
+  }
   return `Hallo Louis! Du hast geschrieben: ${text}`;
 }
 
@@ -87,7 +116,13 @@ const server = http.createServer(async (req, res) => {
       json(res, 400, { error: { message: 'Invalid JSON' } });
       return;
     }
-    const content = replyFor(body.messages);
+    const userText = lastUserText(body.messages);
+    if (userText.includes('#fehler')) {
+      json(res, 500, { error: { message: 'Interner Fehler' } });
+      return;
+    }
+    const content = replyFor(userText);
+    const delay = userText.includes('#lang') ? 60 : 30;
     const id = `chatcmpl-${Date.now()}`;
     if (!body.stream) {
       json(res, 200, {
@@ -110,7 +145,11 @@ const server = http.createServer(async (req, res) => {
       if (closed) return;
       const chunk = { id, object: 'chat.completion.chunk', model: MODEL, choices: [{ index: 0, delta: { content: w } }] };
       res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-      await new Promise((r) => setTimeout(r, 30));
+      await new Promise((r) => setTimeout(r, delay));
+    }
+    if (userText.includes('#abbruch')) {
+      res.socket?.destroy();
+      return;
     }
     res.write(`data: ${JSON.stringify({ id, object: 'chat.completion.chunk', model: MODEL, choices: [{ index: 0, delta: {}, finish_reason: 'stop' }] })}\n\n`);
     res.write('data: [DONE]\n\n');

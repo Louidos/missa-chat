@@ -9,3 +9,4 @@ export * from './errors';
 export * from './url';
 export * from './client';
 export * from './endpoint';
+export * from './chat';
