@@ -21,6 +21,12 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
+      // Zweiter Mock ohne CORS-Header, um "CORS blockiert" zu testen.
+      command: `node tests/mock-api/server.mjs --port ${MOCK_PORT + 1} --no-cors`,
+      url: `http://localhost:${MOCK_PORT + 1}/health`,
+      reuseExistingServer: !process.env.CI,
+    },
+    {
       command: 'npm run build && npm run preview',
       url: `http://localhost:${APP_PORT}`,
       reuseExistingServer: !process.env.CI,

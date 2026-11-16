@@ -1,7 +1,184 @@
 :root {
   color-scheme: light dark;
-  font-family: system-ui, sans-serif;
+  --bg: #faf7f4;
+  --surface: #ffffff;
+  --surface-2: #f1ebe5;
+  --text: #2b2420;
+  --muted: #6b5f57;
+  --border: #d9cfc7;
+  --accent: #b4532a;
+  --accent-text: #ffffff;
+  --accent-soft: #f1c9b5;
+  --danger: #b3261e;
+  --ok: #2e7d32;
+  --warn: #a86800;
+  --radius: 0.9rem;
+  accent-color: var(--accent);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1816;
+    --surface: #262120;
+    --surface-2: #332c29;
+    --text: #f3ece7;
+    --muted: #b8aaa0;
+    --border: #4a403b;
+    --accent: #f0956b;
+    --accent-text: #1c1816;
+    --accent-soft: #6b3a24;
+    --danger: #ff8a80;
+    --ok: #81c784;
+    --warn: #ffcc80;
+  }
+}
+* {
+  box-sizing: border-box;
 }
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  min-width: 320px;
+}
+#app {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem;
+}
+h2 {
+  font-size: 1.15rem;
+  margin: 0 0 0.75rem;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+input,
+select,
+button {
+  font: inherit;
+  color: inherit;
+}
+input[type='url'],
+input[type='text'],
+input[type='password'],
+select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--bg);
+}
+input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+button {
+  min-height: 2.75rem;
+  padding: 0.4rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+button.primary {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: transparent;
+  font-weight: 600;
+}
+button.danger {
+  background: var(--danger);
+  color: var(--surface);
+  border-color: transparent;
+  font-weight: 600;
+}
+button.wide {
+  width: 100%;
+}
+button.link {
+  background: none;
+  border: none;
+  padding: 0;
+  min-height: auto;
+  color: var(--accent);
+  text-decoration: underline;
+  justify-self: start;
+}
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.muted {
+  color: var(--muted);
+}
+.hint {
+  color: var(--muted);
+  font-size: 0.875rem;
+  margin: 0.3rem 0 0;
+}
+.alert {
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  margin: 0;
+}
+.alert p {
+  margin: 0 0 0.4rem;
+}
+.alert p:last-child {
+  margin-bottom: 0;
+}
+.notice {
+  border-left: 4px solid var(--warn);
+  padding: 0.5rem 0.8rem;
+  background: var(--surface-2);
+  border-radius: 0.4rem;
+}
+.center {
+  text-align: center;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.topbar .actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.content {
+  display: grid;
+  gap: 1rem;
+}
+.placeholder {
+  text-align: center;
+  padding: 2rem 0;
+}
+code {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.9em;
 }
