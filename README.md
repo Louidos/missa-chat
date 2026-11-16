@@ -64,9 +64,27 @@ Im Hauptordner liegen neben README, CHANGELOG und LICENSE nur die Projektdateien
 die Werkzeuge dort erwarten (`package.json`, `index.html` als Vite-Einstieg sowie die
 Konfigurationen für Vite, TypeScript, Svelte, ESLint und Playwright).
 
+## Bedienung
+
+Beim ersten Start fragt die App nach API-Adresse und Key, prüft die Verbindung über
+`GET /v1/models` und speichert erst dann. Optional: zweite Adresse fürs Heimnetz und
+PIN-Sperre. Details: [docs/bedienung.md](docs/bedienung.md).
+
+Damit der Browser die API ansprechen darf, muss rp01 CORS für die App-Adresse
+freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
+
 ## Projektstand
 
-Grundgerüst steht. Die Funktionen werden gruppenweise ergänzt, siehe [CHANGELOG](CHANGELOG.md).
+- [x] Verbindung einrichten (Adresse, Key, Prüfung, Heimnetz-Adresse, PIN-Sperre)
+- [ ] Chat-Fenster mit Streaming
+- [ ] Installierbar & offline-fest (PWA)
+- [ ] Missas Look
+- [ ] Verlauf, Suche, Export
+- [ ] Schnellbefehle & Notfall-Knopf
+- [ ] Bilder & Dateien anhängen
+- [ ] Extras
+
+Änderungen stehen im [CHANGELOG](CHANGELOG.md).
 
 ## Lizenz
 
