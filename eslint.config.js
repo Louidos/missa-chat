@@ -20,7 +20,7 @@ export default ts.config(
     languageOptions: { parserOptions: { parser: ts.parser } },
   },
   {
-    files: ['tests/**', '*.config.*'],
+    files: ['tests/**', '*.config.*', '.github/scripts/**'],
     rules: { 'no-console': 'off' },
   },
 );

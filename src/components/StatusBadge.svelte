@@ -1,17 +1,23 @@
 <script lang="ts">
+  import { chat } from '../lib/chat.svelte';
+  import { network } from '../lib/network.svelte';
   import { session } from '../lib/session.svelte';
 
   const kindLabel = $derived(session.activeKind === 'internal' ? 'Heimnetz' : 'extern');
+  const state = $derived(network.online ? session.link : 'offline');
+  const waiting = $derived(chat.queued.length);
 </script>
 
-<div class="status" role="status" aria-live="polite" data-status={session.link}>
+<div class="status" role="status" aria-live="polite" data-status={state}>
   <span class="dot" aria-hidden="true"></span>
-  {#if session.link === 'checking'}
+  {#if state === 'offline'}
+    <span>Offline{waiting ? ` · ${waiting} wartend` : ''}</span>
+  {:else if session.link === 'checking'}
     <span>Verbinde …</span>
   {:else if session.link === 'connected'}
     <span>Verbunden · <strong>{session.connection?.model}</strong> · {kindLabel}</span>
   {:else if session.link === 'error'}
-    <span>Nicht verbunden</span>
+    <span>Server nicht erreichbar{waiting ? ` · ${waiting} wartend` : ''}</span>
   {:else}
     <span>Unbekannt</span>
   {/if}
@@ -45,7 +51,8 @@
   [data-status='connected'] .dot {
     background: var(--ok);
   }
-  [data-status='error'] .dot {
+  [data-status='error'] .dot,
+  [data-status='offline'] .dot {
     background: var(--danger);
   }
   [data-status='checking'] .dot {

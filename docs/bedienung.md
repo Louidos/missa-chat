@@ -52,6 +52,29 @@ Event-Handler, keine Formulare oder iframes, keine `javascript:`-Links. Links ö
 einem neuen Tab ohne Referrer. Bilder von fremden Servern werden nicht geladen (sie
 könnten verraten, dass und wann du eine Antwort liest).
 
+## Installieren und offline
+
+Die App lässt sich wie eine normale App installieren (Laptop: Symbol in der
+Adresszeile; Handy: „Zum Startbildschirm hinzufügen“), siehe [hosting.md](hosting.md).
+
+Oben steht immer der Zustand:
+
+| Anzeige                     | Bedeutung                                                 |
+| --------------------------- | --------------------------------------------------------- |
+| Verbunden · Modell · extern | alles gut (oder „Heimnetz“, wenn die interne Adresse geht) |
+| Offline                     | das Gerät hat kein Netz                                   |
+| Server nicht erreichbar     | Netz da, aber Missa/rp01 antwortet nicht                  |
+
+**Ohne Verbindung** startet die App trotzdem, mit dem bisherigen Verlauf. Neue
+Nachrichten kommen in eine **Warteschlange**: gestrichelt umrandet, „⏳ Wartet auf
+Verbindung“, jede einzeln mit **Löschen** entfernbar. Sobald die Verbindung zurück ist,
+gehen sie der Reihe nach raus, jede bekommt ihre eigene Antwort. Bei „Server nicht
+erreichbar“ probiert die App es alle 20 Sekunden neu (oder sofort mit „Nochmal
+versuchen“).
+
+Gibt es eine **neue Version**, erscheint oben „Neue Version verfügbar“ mit
+**Neu laden**.
+
 ## PIN-Sperre
 
 Mit PIN wird der Key mit **PBKDF2 (600 000 Runden, SHA-256) und AES-GCM** verschlüsselt
