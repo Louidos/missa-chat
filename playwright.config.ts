@@ -6,6 +6,8 @@ const APP_PORT = 4173;
 export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: false,
+  // Nacheinander: ein Test simuliert ein Update, indem er dist/sw.js kurz ändert.
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',

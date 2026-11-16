@@ -10,8 +10,9 @@
     busy: boolean;
     onregenerate: () => void;
     onedit: () => void;
+    ondelete: () => void;
   }
-  let { message, isLast, isLastUser, busy, onregenerate, onedit }: Props = $props();
+  let { message, isLast, isLastUser, busy, onregenerate, onedit, ondelete }: Props = $props();
 
   const mine = $derived(message.role === 'user');
   const html = $derived(mine ? '' : renderMarkdown(message.content));
@@ -82,6 +83,9 @@
         <!-- eslint-disable-next-line svelte/no-at-html-tags -- mit DOMPurify bereinigt -->
         <div class="md" bind:this={body} onclick={onBodyClick} role="presentation">{@html html}</div>
       {/if}
+      {#if message.status === 'queued'}
+        <p class="state queued-note">⏳ Wartet auf Verbindung</p>
+      {/if}
       {#if message.status === 'stopped'}
         <p class="state">Abgebrochen.</p>
       {/if}
@@ -104,7 +108,11 @@
       {#if !mine && isLast && message.status !== 'streaming' && message.status !== 'error'}
         <button type="button" class="mini" onclick={onregenerate} disabled={busy}>Neu erzeugen</button>
       {/if}
-      {#if mine && isLastUser && !busy}
+      {#if message.status === 'queued'}
+        <button type="button" class="mini" onclick={ondelete} aria-label="Wartende Nachricht löschen">
+          Löschen
+        </button>
+      {:else if mine && isLastUser && !busy}
         <button type="button" class="mini" onclick={onedit}>Bearbeiten</button>
       {/if}
     </div>
@@ -150,6 +158,14 @@
     border-radius: 1.1rem 1.1rem 0.3rem 1.1rem;
     background: var(--bubble-me);
     color: var(--bubble-me-text);
+  }
+  [data-status='queued'] .bubble {
+    background: transparent;
+    color: var(--text);
+    border: 2px dashed var(--bubble-me);
+  }
+  .queued-note {
+    color: var(--muted);
   }
   .plain {
     margin: 0;

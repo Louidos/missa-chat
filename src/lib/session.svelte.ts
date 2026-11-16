@@ -52,6 +52,16 @@ class Session {
   #pin: string | null = null;
   #pinFailures = 0;
   #onReset: Array<() => void> = [];
+  #onConnected: Array<() => void> = [];
+
+  /** Wird aufgerufen, sobald die Verbindung (wieder) steht. */
+  onConnected(fn: () => void): void {
+    this.#onConnected.push(fn);
+  }
+
+  #connected(): void {
+    for (const fn of this.#onConnected) fn();
+  }
 
   /** Wird bei Abmelden und Sperren aufgerufen (z. B. laufende Antwort stoppen). */
   onReset(fn: () => void): void {
@@ -129,6 +139,7 @@ class Session {
         await updateConnection({ model, models: ids });
         this.connection = { ...conn, model, models: ids };
       }
+      this.#connected();
     } catch (e) {
       this.activeKind = null;
       this.activeUrl = null;
@@ -188,6 +199,7 @@ class Session {
     this.link = 'connected';
     this.linkMessage = '';
     this.state = 'ready';
+    this.#connected();
     return { ok: true, model, kind: check.active.kind, warning: check.warning };
   }
 

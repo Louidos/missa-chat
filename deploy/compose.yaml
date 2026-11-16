@@ -1,0 +1,33 @@
+# Liefert die gebaute App (../dist) mit einem schlanken Caddy aus.
+# Start:  npm ci && npm run build && cd deploy && docker compose up -d
+# Danach: http://localhost:8080 (bzw. über rp01, siehe docs/hosting.md)
+name: missa-chat
+
+services:
+  web:
+    image: caddy:2.11-alpine
+    restart: unless-stopped
+    ports:
+      - "${MISSA_CHAT_PORT:-8080}:8080"
+    environment:
+      MISSA_API_ORIGINS: ${MISSA_API_ORIGINS:-https://ki.louis-degiorgi.ch}
+      # Caddy braucht beschreibbare Ordner – nur im Arbeitsspeicher.
+      XDG_CONFIG_HOME: /tmp/config
+      XDG_DATA_HOME: /tmp/data
+    volumes:
+      - ../dist:/srv:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    user: "65534:65534"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

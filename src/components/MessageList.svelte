@@ -56,6 +56,7 @@
           isLastUser={i === chat.lastUserIndex}
           busy={chat.streaming}
           onregenerate={() => chat.regenerate()}
+          ondelete={() => chat.deleteQueued(message.id)}
           {onedit}
         />
       {/each}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { chat } from '../lib/chat.svelte';
+  import { network } from '../lib/network.svelte';
   import { session } from '../lib/session.svelte';
   import Composer from './Composer.svelte';
   import MessageList from './MessageList.svelte';
@@ -78,7 +79,11 @@
 
   {#if notice}<p class="notice" role="note">{notice}</p>{/if}
   {#if loadError}<p class="alert" role="alert">{loadError}</p>{/if}
-  {#if session.link === 'error' && !chat.streaming}
+  {#if !network.online}
+    <p class="notice offline" role="note">
+      Du bist offline. Neue Nachrichten warten und gehen raus, sobald die Verbindung zurück ist.
+    </p>
+  {:else if session.link === 'error' && !chat.streaming}
     <div class="alert linkerror" role="alert">
       <span>{session.linkMessage}</span>
       <button type="button" onclick={() => session.refreshLink()}>Nochmal versuchen</button>

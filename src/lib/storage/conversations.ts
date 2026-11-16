@@ -1,6 +1,7 @@
 import { getDb } from './db';
 
-export type MessageStatus = 'done' | 'streaming' | 'stopped' | 'error';
+/** queued = eigene Nachricht wartet offline auf Verbindung (Warteschlange). */
+export type MessageStatus = 'done' | 'streaming' | 'stopped' | 'error' | 'queued';
 
 export interface ChatMessage {
   id: string;

@@ -49,6 +49,12 @@ npm run build     # fertige App in dist/
 npm run test:e2e  # Ende-zu-Ende-Tests (Playwright, mit Mock-API)
 ```
 
+## Betrieb
+
+Fertige App ausliefern mit Docker (Caddy): `npm run build`, dann in `deploy/`
+`docker compose up -d`. Anleitung für ai01 und die Subdomain auf rp01:
+[docs/hosting.md](docs/hosting.md).
+
 ## Aufbau
 
 | Ordner             | Inhalt                                                       |
@@ -60,7 +66,7 @@ npm run test:e2e  # Ende-zu-Ende-Tests (Playwright, mit Mock-API)
 | `tests/e2e/`       | Ende-zu-Ende-Tests (Playwright)                              |
 | `tests/mock-api/`  | Mock-Server, der die Missa-API nachahmt (inkl. Streaming)    |
 | `docs/`            | Doku (Installation, Hosting, Caddy/CORS, Bedienung)          |
-| `deploy/`          | Webserver-Konfiguration zum Ausliefern der fertigen App      |
+| `deploy/`          | compose.yaml + Caddyfile zum Ausliefern der fertigen App     |
 
 Im Hauptordner liegen neben README, CHANGELOG und LICENSE nur die Projektdateien, die
 die Werkzeuge dort erwarten (`package.json`, `index.html` als Vite-Einstieg sowie die
@@ -82,7 +88,7 @@ freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
 
 - [x] Verbindung einrichten (Adresse, Key, Prüfung, Heimnetz-Adresse, PIN-Sperre)
 - [x] Chat-Fenster mit Streaming, Stopp, Neu erzeugen, Bearbeiten, Markdown und Code-Hervorhebung
-- [ ] Installierbar & offline-fest (PWA)
+- [x] Installierbar & offline-fest (PWA) mit Warteschlange und Update-Hinweis
 - [ ] Missas Look
 - [ ] Verlauf, Suche, Export
 - [ ] Schnellbefehle & Notfall-Knopf

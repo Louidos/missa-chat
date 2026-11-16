@@ -4,6 +4,7 @@
   import ChatView from './components/ChatView.svelte';
   import SettingsView from './components/SettingsView.svelte';
   import UnlockView from './components/UnlockView.svelte';
+  import UpdateBanner from './components/UpdateBanner.svelte';
   import { session } from './lib/session.svelte';
 
   let view = $state<'home' | 'settings'>('home');
@@ -17,6 +18,8 @@
     });
   });
 </script>
+
+<UpdateBanner />
 
 {#if loadError}
   <section class="card"><p class="alert" role="alert">{loadError}</p></section>
