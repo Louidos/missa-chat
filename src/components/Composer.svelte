@@ -175,7 +175,7 @@
       {onkeydown}
       {onpaste}
       rows="1"
-      placeholder="Nachricht an Missa … ( / für Befehle)"
+      placeholder="Nachricht an Missa …"
       aria-describedby="composer-hint"
       role="combobox"
       aria-autocomplete="list"

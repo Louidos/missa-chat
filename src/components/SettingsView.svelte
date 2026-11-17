@@ -5,6 +5,7 @@
   import ConfirmDialog from './ConfirmDialog.svelte';
   import ConnectForm from './ConnectForm.svelte';
   import DataSettings from './DataSettings.svelte';
+  import ExtrasSettings from './ExtrasSettings.svelte';
 
   interface Props {
     onclose: (notice?: string) => void;
@@ -45,6 +46,8 @@
   <AppearanceSettings />
 
   <CommandSettings />
+
+  <ExtrasSettings />
 
   <DataSettings />
 

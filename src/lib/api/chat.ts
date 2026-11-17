@@ -30,6 +30,10 @@ export interface StreamResult {
   content: string;
   finishReason: string | null;
   model: string | null;
+  /** Anzahl erzeugter Tokens, falls der Server sie meldet (usage.completion_tokens). */
+  completionTokens: number | null;
+  /** Anzahl empfangener Textstücke (Schätzung, wenn der Server keine Tokens meldet). */
+  chunks: number;
 }
 
 /**
@@ -90,6 +94,8 @@ export async function streamChat(opts: StreamChatOptions): Promise<StreamResult>
   let content = '';
   let finishReason: string | null = null;
   let model: string | null = null;
+  let completionTokens: number | null = null;
+  let chunks = 0;
 
   if (!res.body) throw new ApiError('bad-response');
 
@@ -100,7 +106,13 @@ export async function streamChat(opts: StreamChatOptions): Promise<StreamResult>
     const text = json?.choices?.[0]?.message?.content;
     if (typeof text !== 'string') throw new ApiError('bad-response');
     opts.onDelta(text);
-    return { content: text, finishReason: json.choices[0].finish_reason ?? null, model: json.model ?? null };
+    return {
+      content: text,
+      finishReason: json.choices[0].finish_reason ?? null,
+      model: json.model ?? null,
+      completionTokens: json.usage?.completion_tokens ?? null,
+      chunks: 1,
+    };
   }
 
   try {
@@ -109,6 +121,7 @@ export async function streamChat(opts: StreamChatOptions): Promise<StreamResult>
       let chunk: {
         model?: string;
         error?: unknown;
+        usage?: { completion_tokens?: number } | null;
         choices?: Array<{ delta?: { content?: string | null }; finish_reason?: string | null }>;
       };
       try {
@@ -118,10 +131,12 @@ export async function streamChat(opts: StreamChatOptions): Promise<StreamResult>
       }
       if (chunk.error) throw new ApiError('server');
       model ??= chunk.model ?? null;
+      if (typeof chunk.usage?.completion_tokens === 'number') completionTokens = chunk.usage.completion_tokens;
       const choice = chunk.choices?.[0];
       const delta = choice?.delta?.content;
       if (delta) {
         content += delta;
+        chunks += 1;
         opts.onDelta(delta);
       }
       if (choice?.finish_reason) finishReason = choice.finish_reason;
@@ -132,7 +147,7 @@ export async function streamChat(opts: StreamChatOptions): Promise<StreamResult>
     throw withPartial(new ApiError('interrupted'), content);
   }
   if (opts.signal?.aborted) throw withPartial(new ApiError('aborted'), content);
-  return { content, finishReason, model };
+  return { content, finishReason, model, completionTokens, chunks };
 }
 
 export type PartialApiError = ApiError & { partial: string };

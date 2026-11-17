@@ -78,7 +78,7 @@ function cleanMessage(m: ChatMessage): ChatMessage {
   };
   if (m.error) out.error = m.error;
   if (m.model) out.model = m.model;
-  for (const extra of ['attachments', 'stats'] as const) {
+  for (const extra of ['attachments', 'stats', 'notice'] as const) {
     if (extra in m) (out as unknown as Record<string, unknown>)[extra] = (m as unknown as Record<string, unknown>)[extra];
   }
   return out;

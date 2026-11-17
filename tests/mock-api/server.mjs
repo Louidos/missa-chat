@@ -178,7 +178,8 @@ const server = http.createServer(async (req, res) => {
       res.socket?.destroy();
       return;
     }
-    res.write(`data: ${JSON.stringify({ id, object: 'chat.completion.chunk', model: MODEL, choices: [{ index: 0, delta: {}, finish_reason: 'stop' }] })}\n\n`);
+    const usage = { prompt_tokens: 10, completion_tokens: words.length, total_tokens: 10 + words.length };
+    res.write(`data: ${JSON.stringify({ id, object: 'chat.completion.chunk', model: MODEL, choices: [{ index: 0, delta: {}, finish_reason: 'stop' }], usage })}\n\n`);
     res.write('data: [DONE]\n\n');
     res.end();
     return;

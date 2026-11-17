@@ -106,6 +106,26 @@ Der Verlauf liegt nur lokal im Browser, weil die Missa-API keinen Verlaufs-Endpu
 (siehe [api.md](api.md)). Wartende Offline-Nachrichten gehen raus, wenn ihr Gespräch
 offen ist.
 
+## Extras
+
+- **Vorlesen:** Unter Missas Antworten steht **Vorlesen** (bzw. „Vorlesen stoppen“). Die App
+  benutzt **nur Stimmen, die lokal auf dem Gerät laufen** (`localService === true`).
+  Online-Stimmen würden den Text an einen Cloud-Dienst schicken und werden nie benutzt.
+  Gibt es keine lokale deutsche Stimme, ist der Knopf ausgeblendet, und unter
+  Einstellungen → Vorlesen steht ein Hinweis, wie man eine installiert. Dort lassen sich
+  auch die Stimme wählen und „Antworten automatisch vorlesen“ einschalten.
+- **Benachrichtigungen:** Unter Einstellungen → Benachrichtigungen einschalten (der Browser
+  fragt nach der Erlaubnis). Wird eine Antwort fertig, während die App im Hintergrund ist,
+  kommt „Missa hat geantwortet“. Den Anfang der Antwort zeigt sie nur, wenn man das
+  ausdrücklich einschaltet, denn er wäre auf dem Sperrbildschirm sichtbar.
+- **Nerd-Statistik:** Unter Einstellungen → Für Neugierige. Zeigt unter jeder Antwort die
+  Zeit bis zum ersten Wort, Tokens/s, die Zahl der Tokens, die Gesamtdauer, das Modell und
+  die genutzte Adresse (Heimnetz/extern). Meldet der Server keine Token-Zahl, wird sie
+  geschätzt und mit „~“ markiert.
+- **Tastenkürzel:** **?** (ausserhalb des Eingabefelds) zeigt die Übersicht.
+- **Entwürfe:** Halb getippte Nachrichten bleiben pro Gespräch erhalten, auch nach dem
+  Neuladen.
+
 ## Darstellung von Missas Antworten
 
 Antworten werden als Markdown dargestellt (Listen, Tabellen, Links, Code). Code wird
@@ -200,6 +220,26 @@ angezeigt.
 Der Verlauf liegt nur lokal im Browser, weil die Missa-API keinen Verlaufs-Endpunkt hat
 (siehe [api.md](api.md)). Wartende Offline-Nachrichten gehen raus, wenn ihr Gespräch
 offen ist.
+
+## Extras
+
+- **Vorlesen:** Unter Missas Antworten steht **Vorlesen** (bzw. „Vorlesen stoppen“). Die App
+  benutzt **nur Stimmen, die lokal auf dem Gerät laufen** (`localService === true`).
+  Online-Stimmen würden den Text an einen Cloud-Dienst schicken und werden nie benutzt.
+  Gibt es keine lokale deutsche Stimme, ist der Knopf ausgeblendet, und unter
+  Einstellungen → Vorlesen steht ein Hinweis, wie man eine installiert. Dort lassen sich
+  auch die Stimme wählen und „Antworten automatisch vorlesen“ einschalten.
+- **Benachrichtigungen:** Unter Einstellungen → Benachrichtigungen einschalten (der Browser
+  fragt nach der Erlaubnis). Wird eine Antwort fertig, während die App im Hintergrund ist,
+  kommt „Missa hat geantwortet“. Den Anfang der Antwort zeigt sie nur, wenn man das
+  ausdrücklich einschaltet, denn er wäre auf dem Sperrbildschirm sichtbar.
+- **Nerd-Statistik:** Unter Einstellungen → Für Neugierige. Zeigt unter jeder Antwort die
+  Zeit bis zum ersten Wort, Tokens/s, die Zahl der Tokens, die Gesamtdauer, das Modell und
+  die genutzte Adresse (Heimnetz/extern). Meldet der Server keine Token-Zahl, wird sie
+  geschätzt und mit „~“ markiert.
+- **Tastenkürzel:** **?** (ausserhalb des Eingabefelds) zeigt die Übersicht.
+- **Entwürfe:** Halb getippte Nachrichten bleiben pro Gespräch erhalten, auch nach dem
+  Neuladen.
 
 ## Darstellung
 

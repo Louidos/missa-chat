@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import { avatar } from '../lib/avatar.svelte';
   import { chat } from '../lib/chat.svelte';
   import { commandStore } from '../lib/commandStore.svelte';
@@ -12,6 +12,8 @@
   import Composer from './Composer.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import QuickBar from './QuickBar.svelte';
+  import ShortcutsDialog from './ShortcutsDialog.svelte';
+  import { loadDraft, saveDraft } from '../lib/drafts';
   import MessageList from './MessageList.svelte';
   import SearchDialog from './SearchDialog.svelte';
   import Sidebar from './Sidebar.svelte';
@@ -29,6 +31,41 @@
   let loadError = $state('');
   let drawer = $state(false);
   let commandHint = $state('');
+  let shortcutsOpen = $state(false);
+
+  // Entwürfe pro Gespräch: beim Wechsel laden, beim Tippen (verzögert) speichern.
+  let draftFor = $state<string | null>(null);
+  $effect(() => {
+    const id = chat.conversation.id;
+    if (!chat.loaded) return;
+    untrack(() => {
+      if (editing) return;
+      // Entwurf des bisherigen Gesprächs sofort sichern, dann Feld leeren.
+      if (draftFor && draftFor !== id) void saveDraft(draftFor, draft).catch(() => {});
+      if (draftFor !== id) draft = '';
+      draftFor = null;
+    });
+    void loadDraft(id)
+      .catch(() => '')
+      .then((text) => {
+        if (chat.conversation.id !== id) return;
+        // Nur übernehmen, wenn inzwischen nichts getippt wurde.
+        if (!editing && !draft) draft = text;
+        draftFor = id;
+      });
+  });
+  $effect(() => {
+    const text = draft;
+    const id = draftFor;
+    if (!id || editing) return;
+    const t = setTimeout(() => void saveDraft(id, text).catch(() => {}), 300);
+    return () => clearTimeout(t);
+  });
+
+  /** Entwurf sofort speichern (beim Schliessen oder Wegwechseln der App). */
+  function flushDraft() {
+    if (draftFor && !editing) void saveDraft(draftFor, draft).catch(() => {});
+  }
   let pending = $state<Attachment[]>([]);
   let fileErrors = $state<string[]>([]);
   let busyFiles = $state(false);
@@ -117,6 +154,8 @@
     if (busyFiles) await filesReady;
     const text = draft;
     draft = '';
+    // Gesendet → Entwurf sofort weg (nicht erst nach der Verzögerung).
+    void saveDraft(chat.conversation.id, '').catch(() => {});
     if (editing) {
       editing = false;
       void chat.editLast(text);
@@ -156,7 +195,17 @@
     draft = '';
   }
 
+  function isTyping(t: EventTarget | null): boolean {
+    const el = t as HTMLElement | null;
+    return !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
+  }
+
   function onkeydown(e: KeyboardEvent) {
+    if (e.key === '?' && !isTyping(e.target) && !document.querySelector('dialog[open]')) {
+      e.preventDefault();
+      shortcutsOpen = true;
+      return;
+    }
     if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       searchOpen = true;
@@ -176,7 +225,12 @@
   }
 </script>
 
-<svelte:window {onkeydown} />
+<svelte:window {onkeydown} onpagehide={flushDraft} />
+<svelte:document
+  onvisibilitychange={() => {
+    if (document.visibilityState === 'hidden') flushDraft();
+  }}
+/>
 
 <div class="layout" class:drawer-open={drawer}>
 <aside id="sidebar" class="side">
@@ -285,6 +339,7 @@
 </div>
 
 <SearchDialog bind:open={searchOpen} />
+<ShortcutsDialog bind:open={shortcutsOpen} />
 
 <ConfirmDialog
   bind:open={confirmEmergency}

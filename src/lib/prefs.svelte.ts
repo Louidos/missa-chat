@@ -14,6 +14,16 @@ export interface Prefs {
   commands: Command[] | null;
   /** Wie oft welcher Befehl benutzt wurde (für die Schnellknöpfe). */
   commandUsage: Record<string, number>;
+  /** Gewählte lokale Stimme (voiceURI) oder null = erste lokale deutsche Stimme. */
+  ttsVoice: string | null;
+  /** Antworten automatisch vorlesen. */
+  ttsAuto: boolean;
+  /** Benachrichtigung, wenn eine Antwort im Hintergrund fertig wird. */
+  notify: boolean;
+  /** Anfang der Antwort in der Benachrichtigung zeigen (sonst nur „Missa hat geantwortet“). */
+  notifyPreview: boolean;
+  /** Nerd-Statistik unter Missas Antworten. */
+  nerdStats: boolean;
 }
 
 const PREFS_ID = 'prefs';
@@ -23,6 +33,11 @@ export const DEFAULT_PREFS: Prefs = {
   theme: 'auto',
   commands: null,
   commandUsage: {},
+  ttsVoice: null,
+  ttsAuto: false,
+  notify: false,
+  notifyPreview: false,
+  nerdStats: false,
 };
 
 /** Setzt data-theme auf <html> (auto = Attribut entfernen, System entscheidet). */
