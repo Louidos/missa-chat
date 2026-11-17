@@ -16,6 +16,8 @@
  *   #lang     – lange, langsame Antwort (für Stopp und Scrollen)
  *   #abbruch  – Verbindung bricht mitten in der Antwort ab
  *   #fehler   – Server antwortet mit 500
+ *   #frage    – Antwort ist eine Ja/Nein-Rückfrage
+ *   Notfall-Stopp – Bestätigung des Notfall-Stopps
  * CORS wie in docs/caddy-cors.md beschrieben: OPTIONS ohne Key, alles andere mit Key.
  */
 import http from 'node:http';
@@ -80,6 +82,12 @@ function replyFor(text) {
   }
   if (text.includes('#lang')) {
     return Array.from({ length: 120 }, (_, i) => `Wort${i + 1}`).join(' ') + ' ENDE';
+  }
+  if (text.includes('#frage')) {
+    return 'Ich habe einen Termin gefunden. Soll ich dich morgen um 8 Uhr daran erinnern?';
+  }
+  if (text.trim() === 'Notfall-Stopp') {
+    return 'Notfall-Stopp ausgeführt. Alle laufenden Aufgaben sind angehalten.';
   }
   if (text.includes('#abbruch')) {
     return 'Das ist der Anfang einer Antwort, die gleich abbricht';

@@ -9,6 +9,7 @@
   }
   let { open = $bindable(false), title, message, confirmLabel, danger = false, onconfirm }: Props =
     $props();
+  const uid = $props.id();
   let dialog: HTMLDialogElement | undefined = $state();
   let busy = $state(false);
 
@@ -29,8 +30,8 @@
   }
 </script>
 
-<dialog bind:this={dialog} onclose={() => (open = false)} aria-labelledby="confirm-title">
-  <h2 id="confirm-title">{title}</h2>
+<dialog bind:this={dialog} onclose={() => (open = false)} aria-labelledby="confirm-title-{uid}">
+  <h2 id="confirm-title-{uid}">{title}</h2>
   <p>{message}</p>
   <div class="actions">
     <button type="button" onclick={() => (open = false)} disabled={busy}>Abbrechen</button>

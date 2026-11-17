@@ -1,3 +1,4 @@
+import type { Command } from './commands';
 import { getDb } from './storage/db';
 
 /*
@@ -9,6 +10,10 @@ export type ThemeChoice = 'auto' | 'light' | 'dark';
 
 export interface Prefs {
   theme: ThemeChoice;
+  /** Eigene Schnellbefehle (null = Standard aus src/config/commands.json). */
+  commands: Command[] | null;
+  /** Wie oft welcher Befehl benutzt wurde (für die Schnellknöpfe). */
+  commandUsage: Record<string, number>;
 }
 
 const PREFS_ID = 'prefs';
@@ -16,6 +21,8 @@ const THEME_CACHE = 'missa-theme';
 
 export const DEFAULT_PREFS: Prefs = {
   theme: 'auto',
+  commands: null,
+  commandUsage: {},
 };
 
 /** Setzt data-theme auf <html> (auto = Attribut entfernen, System entscheidet). */

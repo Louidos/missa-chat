@@ -1,0 +1,18 @@
+{
+  "_hinweis": "Schnellbefehle für das Eingabefeld. 'text' wird als normale Nachricht an Missa gesendet, {text} wird durch das ersetzt, was nach dem Befehl steht. 'aktion' führt etwas in der App aus statt zu senden. In der App unter Einstellungen → Schnellbefehle änder- und ergänzbar.",
+  "notfall_text": "Notfall-Stopp",
+  "befehle": [
+    { "name": "heute", "beschreibung": "Was steht heute an?", "text": "Was steht heute an?" },
+    { "name": "morgen", "beschreibung": "Was steht morgen an?", "text": "Was steht morgen an?" },
+    {
+      "name": "erinnerung",
+      "beschreibung": "Erinnerung anlegen",
+      "text": "Erstelle eine Erinnerung: {text}",
+      "platzhalter": "<Zeit> <Text>"
+    },
+    { "name": "termin", "beschreibung": "Termin eintragen", "text": "Trag diesen Termin ein: {text}", "platzhalter": "<Text>" },
+    { "name": "server", "beschreibung": "Wie geht's den Servern?", "text": "Wie geht's den Servern?" },
+    { "name": "notiz", "beschreibung": "Notiz speichern", "text": "Notiere: {text}", "platzhalter": "<Text>" },
+    { "name": "neu", "beschreibung": "Neues Gespräch beginnen", "aktion": "neues-gespraech" }
+  ]
+}
