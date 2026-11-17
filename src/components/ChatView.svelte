@@ -6,6 +6,8 @@
   import { session } from '../lib/session.svelte';
   import Composer from './Composer.svelte';
   import MessageList from './MessageList.svelte';
+  import SearchDialog from './SearchDialog.svelte';
+  import Sidebar from './Sidebar.svelte';
   import StatusBadge from './StatusBadge.svelte';
 
   interface Props {
@@ -18,6 +20,8 @@
   let editing = $state(false);
   let composer: Composer | undefined = $state();
   let loadError = $state('');
+  let drawer = $state(false);
+  let searchOpen = $state(false);
 
   onMount(() => {
     if (!chat.loaded) {
@@ -51,8 +55,16 @@
   }
 
   function onkeydown(e: KeyboardEvent) {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      searchOpen = true;
+      return;
+    }
     if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return;
-    if (chat.streaming) {
+    if (drawer) {
+      e.preventDefault();
+      drawer = false;
+    } else if (chat.streaming) {
       e.preventDefault();
       chat.stop();
     } else if (editing) {
@@ -64,8 +76,25 @@
 
 <svelte:window {onkeydown} />
 
+<div class="layout" class:drawer-open={drawer}>
+<aside id="sidebar" class="side">
+  <Sidebar onpicked={() => (drawer = false)} onsearch={() => ((drawer = false), (searchOpen = true))} />
+</aside>
+{#if drawer}
+  <button type="button" class="scrim" aria-label="Gesprächsliste schliessen" onclick={() => (drawer = false)}></button>
+{/if}
 <div class="chat">
   <header class="topbar">
+    <button
+      type="button"
+      class="icon menu-btn"
+      aria-label="Gespräche"
+      aria-controls="sidebar"
+      aria-expanded={drawer}
+      onclick={() => (drawer = !drawer)}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+    </button>
     <div class="title">
       <img class="head-avatar" src={avatar.url} alt="" width="36" height="36" />
       <div class="name">
@@ -111,14 +140,72 @@
     oncanceledit={cancelEdit}
   />
 </div>
+</div>
+
+<SearchDialog bind:open={searchOpen} />
 
 <style>
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    height: 100vh;
+    height: 100dvh;
+  }
+  .side {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(85vw, 20rem);
+    z-index: 20;
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+    transform: translateX(-105%);
+    visibility: hidden;
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s;
+  }
+  .drawer-open .side {
+    transform: none;
+    visibility: visible;
+  }
+  .scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background: rgb(0 0 0 / 0.4);
+    border: none;
+    border-radius: 0;
+  }
+  @media (min-width: 900px) {
+    .layout {
+      grid-template-columns: 17rem 1fr;
+      gap: 1rem;
+    }
+    .side {
+      position: static;
+      width: auto;
+      transform: none;
+      visibility: visible;
+      box-shadow: none;
+      background: none;
+      border-right: 1px solid var(--border);
+      height: 100dvh;
+    }
+    .menu-btn,
+    .scrim {
+      display: none;
+    }
+  }
   .chat {
     position: relative;
     display: flex;
     flex-direction: column;
     height: 100vh;
     height: 100dvh;
+    width: 100%;
+    max-width: 48rem;
+    margin: 0 auto;
+    min-width: 0;
   }
   .topbar {
     padding-top: 0.75rem;

@@ -90,7 +90,7 @@ freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
 - [x] Chat-Fenster mit Streaming, Stopp, Neu erzeugen, Bearbeiten, Markdown und Code-Hervorhebung
 - [x] Installierbar & offline-fest (PWA) mit Warteschlange und Update-Hinweis
 - [x] Missas Look (hell/dunkel, eigener Avatar, Tageszeit-Begrüssung)
-- [ ] Verlauf, Suche, Export
+- [x] Verlauf, Suche (Ctrl+K), Export als Markdown und JSON
 - [ ] Schnellbefehle & Notfall-Knopf
 - [ ] Bilder & Dateien anhängen
 - [ ] Extras
