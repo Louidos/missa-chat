@@ -43,13 +43,69 @@ Fenster, mit Hot-Reload. Für Tests ohne echte API: `npm run mock-api` (siehe RE
 
 ## Installieren
 
+### Herunterladen
+
+Jedes [GitHub-Release](https://github.com/Louidos/missa-chat/releases) ab Version 0.4.0
+hat die fertige Windows-App angehängt:
+
+- `Missa_X.Y.Z_x64-setup.exe` – der Installer (ca. 2 MB)
+- `Missa_X.Y.Z_x64-setup.exe.sha256` – die SHA-256-Prüfsumme
+
+Wer prüfen will, ob die Datei unverändert angekommen ist, vergleicht in PowerShell die
+Ausgabe mit dem Inhalt der `.sha256`-Datei:
+
+```powershell
+Get-FileHash .\Missa_X.Y.Z_x64-setup.exe -Algorithm SHA256
+```
+
+### Installieren
+
 `setup.exe` doppelklicken. Der Installer ist deutsch, braucht **keine Admin-Rechte**
 (Installation nur für den eigenen Benutzer nach `%LOCALAPPDATA%\Missa`) und legt
 „Missa“ im Startmenü an. Fehlt WebView2 ausnahmsweise, lädt der Installer es von Microsoft
 nach (der Installer selbst bleibt dadurch klein).
 
-Deinstallieren: Windows-Einstellungen → Apps → Installierte Apps → Missa → Deinstallieren.
-Dabei lässt sich wählen, ob auch die App-Daten (Verlauf, Einstellungen, Key) gelöscht werden.
+### SmartScreen-Warnung beim ersten Start
+
+Die `setup.exe` ist **nicht signiert** (eine Code-Signatur kostet Geld). Windows zeigt
+deshalb beim ersten Öffnen „Der Computer wurde durch Windows geschützt“. Das ist bei
+unsignierten Programmen normal und heisst nicht, dass etwas nicht stimmt. Trotzdem
+installieren:
+
+1. Auf **Weitere Informationen** klicken.
+2. Prüfen, dass als Herausgeber „Unbekannter Herausgeber“ und als App
+   `Missa_X.Y.Z_x64-setup.exe` steht.
+3. **Trotzdem ausführen** klicken.
+
+Bei heruntergeladenen Dateien kann auch der Browser (Edge) zuerst nachfragen: im
+Download-Menü bei der Datei **…** → **Beibehalten** → **Weitere anzeigen** →
+**Trotzdem beibehalten**. Nur Dateien direkt vom GitHub-Release dieses Repos verwenden
+und im Zweifel die Prüfsumme vergleichen.
+
+### Aktualisieren
+
+Die neue `setup.exe` vom Release herunterladen und einfach darüber installieren – Missa
+vorher schliessen. Verlauf, Key und Einstellungen bleiben erhalten, weil sie nicht im
+Programmordner liegen (siehe „Wo die Daten liegen“). Die App sucht nicht selbst nach
+Updates: Das bräuchte Anfragen an einen fremden Server.
+
+### Stille Installation
+
+Für Skripte oder mehrere Rechner ohne Fenster und Rückfragen:
+
+```powershell
+.\Missa_X.Y.Z_x64-setup.exe /S
+```
+
+Das funktioniert auch zum Aktualisieren. Die SmartScreen-Warnung erscheint dabei nicht,
+wenn die Datei nicht aus dem Internet markiert ist (z. B. vorher mit
+`Unblock-File .\Missa_X.Y.Z_x64-setup.exe` freigeben).
+
+### Deinstallieren
+
+Windows-Einstellungen → Apps → Installierte Apps → Missa → Deinstallieren. Dabei lässt
+sich wählen, ob auch die App-Daten (Verlauf, Einstellungen, Key) gelöscht werden. Ohne
+dieses Häkchen bleiben sie, und eine spätere Neuinstallation findet sie wieder.
 
 ## Festgelegte Herkunft (Origin)
 
@@ -120,3 +176,18 @@ Die Version steht in `package.json`; `tauri.conf.json` liest sie von dort. Cargo
 eine eigene Angabe in `src-tauri/Cargo.toml` – sie muss gleich sein (Unit-Test
 `tests/unit/desktop.test.ts` prüft das). Bei einem Release also `package.json`,
 `package-lock.json`, `src-tauri/Cargo.toml` und `src-tauri/Cargo.lock` zusammen anheben.
+Prüfen: `node .github/scripts/check-version.mjs vX.Y.Z`.
+
+## Release
+
+Beim Pushen eines Tags `vX.Y.Z` läuft `.github/workflows/release.yml`:
+
+1. Prüft, ob Tag, `package.json`, `package-lock.json`, `tauri.conf.json`, `Cargo.toml`
+   und `Cargo.lock` zusammenpassen. Sonst bricht er mit einer Meldung ab, welche Datei
+   welche Version hat.
+2. Erstellt das GitHub-Release mit dem Abschnitt aus `CHANGELOG.md`.
+3. Baut auf Windows die App und hängt `Missa_X.Y.Z_x64-setup.exe` und
+   `Missa_X.Y.Z_x64-setup.exe.sha256` ans Release.
+
+Schlägt Schritt 3 fehl, im Actions-Tab „Re-run failed jobs“ wählen: Das Release wird
+nicht doppelt angelegt, und schon hochgeladene Dateien werden ersetzt.

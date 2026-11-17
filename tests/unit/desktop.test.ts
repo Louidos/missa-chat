@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -71,6 +72,24 @@ describe('Windows-App: festgelegte Werte', () => {
       expect(p).toMatch(/^notification:allow-/);
     }
     expect(conf.app.withGlobalTauri).toBe(false);
+  });
+});
+
+describe('Versionsprüfung fürs Release', () => {
+  const run = (tag: string) =>
+    spawnSync(process.execPath, [join(root, '.github/scripts/check-version.mjs'), tag], { encoding: 'utf8' });
+  const version = JSON.parse(read('package.json')).version as string;
+
+  it('passt der Tag, läuft sie durch', () => {
+    const r = run(`v${version}`);
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain(`Version ${version} stimmt überall`);
+  });
+
+  it('passt der Tag nicht, bricht sie mit einer verständlichen Meldung ab', () => {
+    const r = run('v99.0.0');
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain(`Tag v99.0.0 passt nicht zu package.json (${version})`);
   });
 });
 
