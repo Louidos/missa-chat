@@ -4,7 +4,7 @@ import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 
 export default ts.config(
-  { ignores: ['dist/', 'node_modules/', 'test-results/', 'playwright-report/'] },
+  { ignores: ['dist/', 'dist-desktop/', 'src-tauri/target/', 'src-tauri/gen/', 'node_modules/', 'test-results/', 'playwright-report/'] },
   js.configs.recommended,
   ...ts.configs.recommended,
   ...svelte.configs.recommended,

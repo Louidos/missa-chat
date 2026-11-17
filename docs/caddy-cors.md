@@ -7,6 +7,11 @@ darf. Ohne Freigabe blockiert er die Antwort, und die App meldet:
 
 > Der Server ist erreichbar, aber der Browser blockiert die Antwort (CORS).
 
+Die **Windows-App** ([windows-app.md](windows-app.md)) fragt genauso per CORS an, mit
+der festen Herkunft `http://tauri.localhost`. Sie muss deshalb als zusätzliche erlaubte
+App-Adresse eingetragen werden (siehe Snippet). Die Herkunft ist fest und ändert sich nie;
+`http` ist hier richtig, auch wenn die API selbst nur HTTPS spricht.
+
 Diese Seite ist **nur eine Anleitung**. Die App ändert nichts auf rp01.
 
 ## Was der Proxy tun muss
@@ -22,22 +27,23 @@ Diese Seite ist **nur eine Anleitung**. Die App ändert nichts auf rp01.
 
 ## Caddy-Snippet
 
-Annahmen: Die API läuft unter `ki.louis-degiorgi.ch`, die App unter
-`chat.louis-degiorgi.ch`. Die bestehende Key-Prüfung und der `reverse_proxy` zu ai01
+Annahmen: Die API läuft unter `ki.louis-degiorgi.ch`, die Web-App unter
+`chat.louis-degiorgi.ch`, die Windows-App unter `http://tauri.localhost`. Die bestehende Key-Prüfung und der `reverse_proxy` zu ai01
 bleiben, wie sie sind – sie kommen in Schritt 3 unverändert in den `route`-Block.
 `route` sorgt dafür, dass Caddy die Schritte genau in dieser Reihenfolge ausführt.
 
 ```caddyfile
 ki.louis-degiorgi.ch {
-	# Erlaubte App-Adressen (mehrere durch Leerzeichen trennen).
+	# Erlaubte App-Adressen (mehrere durch Leerzeichen trennen):
+	# Web-App/PWA und Windows-App (http://tauri.localhost, fest).
 	# http://localhost:5173 nur eintragen, wenn du lokal entwickelst.
-	@app_origin header Origin https://chat.louis-degiorgi.ch
+	@app_origin header Origin https://chat.louis-degiorgi.ch http://tauri.localhost
 
 	route {
 		# 1) Preflight: OPTIONS von der App ohne Key-Prüfung beantworten
 		@preflight {
 			method OPTIONS
-			header Origin https://chat.louis-degiorgi.ch
+			header Origin https://chat.louis-degiorgi.ch http://tauri.localhost
 		}
 		handle @preflight {
 			header {
@@ -86,6 +92,12 @@ Preflight (muss **204** ohne Key liefern und die `Access-Control-*`-Header zeige
 
 ```bash
 curl -si -X OPTIONS https://ki.louis-degiorgi.ch/v1/models -H "Origin: https://chat.louis-degiorgi.ch" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: authorization"
+```
+
+Dasselbe für die Windows-App (muss ebenfalls **204** liefern):
+
+```bash
+curl -si -X OPTIONS https://ki.louis-degiorgi.ch/v1/models -H "Origin: http://tauri.localhost" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: authorization"
 ```
 
 Anfrage ohne Key (muss **401** liefern, **mit** `Access-Control-Allow-Origin`):

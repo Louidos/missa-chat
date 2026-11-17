@@ -2,8 +2,8 @@
 
 Chat-App für **Missa**, die selbstgehostete KI-Assistentin. Die App ist nur ein Zugang:
 API-Adresse und Key eingeben, und man hat ein schönes Chat-Fenster. Die ganze Logik
-bleibt auf dem Server (missa-core). Läuft im Browser am Laptop und lässt sich auf dem
-Handy als PWA installieren.
+bleibt auf dem Server (missa-core). Läuft im Browser am Laptop, lässt sich auf dem
+Handy als PWA installieren und gibt es als Windows-App mit kleiner `setup.exe`.
 
 **Version:** 0.3.0 – alle geplanten Funktionen: Look, Verlauf, Schnellbefehle, Anhänge, Extras
 
@@ -22,6 +22,13 @@ Voraussetzung: Node.js 22 oder neuer.
 ```bash
 npm ci
 ```
+
+### Windows-App
+
+Die Windows-App wird mit `npm run tauri:build` gebaut (auf Windows, mit Rust) und als
+`setup.exe` installiert – ohne Admin-Rechte, danach steht „Missa“ im Startmenü. Die CI
+baut die `setup.exe` bei jedem Lauf mit. Details, Unterschiede zum Browser und wo die
+Daten liegen: [docs/windows-app.md](docs/windows-app.md).
 
 ## Start
 
@@ -67,6 +74,7 @@ Fertige App ausliefern mit Docker (Caddy): `npm run build`, dann in `deploy/`
 | `tests/mock-api/`  | Mock-Server, der die Missa-API nachahmt (inkl. Streaming)    |
 | `docs/`            | Doku (Installation, Hosting, Caddy/CORS, Bedienung)          |
 | `deploy/`          | compose.yaml + Caddyfile zum Ausliefern der fertigen App     |
+| `src-tauri/`       | Hülle der Windows-App (Tauri 2, Rust): Fenster, Installer    |
 
 Im Hauptordner liegen neben README, CHANGELOG und LICENSE nur die Projektdateien, die
 die Werkzeuge dort erwarten (`package.json`, `index.html` als Vite-Einstieg sowie die
@@ -82,7 +90,8 @@ Danach öffnet sich das Chat-Fenster: Enter sendet, Shift+Enter macht eine neue 
 Missas Antwort erscheint Wort für Wort, **Stopp** oder **Esc** bricht ab.
 
 Damit der Browser die API ansprechen darf, muss rp01 CORS für die App-Adresse
-freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
+freigeben – für die Windows-App zusätzlich `http://tauri.localhost`:
+[docs/caddy-cors.md](docs/caddy-cors.md).
 
 ## Projektstand
 
@@ -94,6 +103,7 @@ freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
 - [x] Schnellbefehle mit /, Ja/Nein-Knöpfe und Notfall-Knopf
 - [x] Bilder, Screenshots (Ctrl+V) und Textdateien anhängen
 - [x] Extras: Vorlesen mit lokalen Stimmen, Benachrichtigungen, Nerd-Statistik, Tastenkürzel, Entwürfe
+- [x] Windows-App mit kleinem Installer (Tauri), eigenes Fenster, merkt sich Grösse und Position
 
 Änderungen stehen im [CHANGELOG](CHANGELOG.md).
 

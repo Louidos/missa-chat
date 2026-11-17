@@ -1,12 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { FEATURES } from '../lib/platform';
 
   let needRefresh = $state(false);
   let busy = $state(false);
   let update: ((reload?: boolean) => Promise<void>) | null = null;
 
   onMount(() => {
-    if (!('serviceWorker' in navigator)) return;
+    // Windows-App: kein Service Worker, neue Versionen kommen per setup.exe.
+    if (!FEATURES.updateBanner || !('serviceWorker' in navigator)) return;
     // Erst zur Laufzeit laden: das Modul gibt es nur im Build mit vite-plugin-pwa.
     void import('virtual:pwa-register').then(({ registerSW }) => {
       update = registerSW({
