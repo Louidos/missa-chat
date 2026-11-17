@@ -159,6 +159,11 @@ test('Neu erzeugen und letzte Nachricht bearbeiten', async ({ page }) => {
 
 test('Wer nach oben scrollt, wird nicht zurückgerissen; „Nach unten“ erscheint', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 640 });
+  // Zum Nachstellen langsamer Rechner (z. B. CI): SLOW_CPU=10 npm run test:e2e
+  if (process.env.SLOW_CPU) {
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: Number(process.env.SLOW_CPU) });
+  }
   for (let i = 0; i < 3; i++) {
     await send(page, `Füllnachricht ${i} – ${'bla '.repeat(40)}`);
     await expect(lastMissa(page)).toHaveAttribute('data-status', 'done');
@@ -166,7 +171,19 @@ test('Wer nach oben scrollt, wird nicht zurückgerissen; „Nach unten“ ersche
   await send(page, '#lang');
   await expect(lastMissa(page)).toContainText('Wort5');
   const log = page.getByRole('log');
-  await log.evaluate((el) => el.scrollTo({ top: 0 }));
+  // Hochscrollen und das nächste Wort abwarten, bevor das scroll-Event verarbeitet ist:
+  // Genau dann darf die App einen nicht wieder nach unten reissen.
+  const topAfterNextWord = await log.evaluate(
+    (el) =>
+      new Promise<number>((resolve) => {
+        new MutationObserver((_, obs) => {
+          obs.disconnect();
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve(el.scrollTop)));
+        }).observe(el, { subtree: true, characterData: true, childList: true });
+        el.scrollTo({ top: 0 });
+      }),
+  );
+  expect(topAfterNextWord).toBeLessThan(50);
   await expect(page.getByRole('button', { name: 'Nach unten scrollen' })).toBeVisible();
   await page.waitForTimeout(600);
   expect(await log.evaluate((el) => el.scrollTop)).toBeLessThan(50);
