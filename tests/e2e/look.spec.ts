@@ -136,7 +136,7 @@ test('Avatar atmet beim Tippen; mit reduzierter Bewegung keine Animationen', asy
     } else {
       expect(anim).toBe('breathe');
     }
-    await page.getByRole('button', { name: 'Stopp' }).click();
+    await page.getByRole('button', { name: 'Stopp', exact: true }).click();
     await ctx.close();
   }
 });
