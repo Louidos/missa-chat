@@ -7,6 +7,10 @@ die Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
 ## Unveröffentlicht
 
+### Hinzugefügt
+
+- Eigenes Missa-Design mit Avatar, hellem/dunklem Modus und Tageszeit-Begrüssung: warme, weiche Optik mit mitgebauter Schrift, Farbmodus automatisch oder von Hand, eigener Avatar hochladbar, Avatar „atmet“ beim Tippen, keine Animationen bei „Bewegung reduzieren“ (#12)
+
 ## 0.2.0 – 2026-11-16
 
 ### Hinzugefügt

@@ -1,0 +1,10 @@
+{
+  "_hinweis": "Begrüssungen auf dem leeren Bildschirm. 'von' und 'bis' sind Stunden (0–24). Ein Bereich darf über Mitternacht gehen (z. B. von 23 bis 5). Aus 'texte' wird zufällig einer gewählt.",
+  "zeiten": [
+    { "von": 5, "bis": 11, "texte": ["Na, schon wach?", "Guten Morgen! Kaffee schon da?", "Morgen! Was steht heute an?"] },
+    { "von": 11, "bis": 14, "texte": ["Mahlzeit! Was liegt an?", "Hallo! Schon was gegessen?"] },
+    { "von": 14, "bis": 18, "texte": ["Hallo! Wie läuft der Nachmittag?", "Na, was kann ich tun?"] },
+    { "von": 18, "bis": 23, "texte": ["Guten Abend! Was darf's sein?", "Feierabend? Erzähl mal."] },
+    { "von": 23, "bis": 5, "texte": ["Noch auf?", "Na, Nachteule?", "So spät noch wach?"] }
+  ]
+}

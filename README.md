@@ -89,7 +89,7 @@ freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
 - [x] Verbindung einrichten (Adresse, Key, Prüfung, Heimnetz-Adresse, PIN-Sperre)
 - [x] Chat-Fenster mit Streaming, Stopp, Neu erzeugen, Bearbeiten, Markdown und Code-Hervorhebung
 - [x] Installierbar & offline-fest (PWA) mit Warteschlange und Update-Hinweis
-- [ ] Missas Look
+- [x] Missas Look (hell/dunkel, eigener Avatar, Tageszeit-Begrüssung)
 - [ ] Verlauf, Suche, Export
 - [ ] Schnellbefehle & Notfall-Knopf
 - [ ] Bilder & Dateien anhängen

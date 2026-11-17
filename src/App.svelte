@@ -5,6 +5,8 @@
   import SettingsView from './components/SettingsView.svelte';
   import UnlockView from './components/UnlockView.svelte';
   import UpdateBanner from './components/UpdateBanner.svelte';
+  import { avatar } from './lib/avatar.svelte';
+  import { prefs } from './lib/prefs.svelte';
   import { session } from './lib/session.svelte';
 
   let view = $state<'home' | 'settings'>('home');
@@ -12,6 +14,12 @@
   let loadError = $state('');
 
   onMount(() => {
+    session.onLogout(() => {
+      prefs.reset();
+      avatar.reset();
+    });
+    void prefs.load().catch(() => {});
+    void avatar.load().catch(() => {});
     session.init().catch(() => {
       loadError =
         'Die lokalen Daten konnten nicht geladen werden. Ist privates Surfen aktiv oder der Speicher voll?';

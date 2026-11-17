@@ -75,6 +75,23 @@ versuchen“).
 Gibt es eine **neue Version**, erscheint oben „Neue Version verfügbar“ mit
 **Neu laden**.
 
+## Darstellung
+
+Unter **Einstellungen → Darstellung**:
+
+- **Farbmodus:** Automatisch (folgt dem System), Hell oder Dunkel. Die Wahl bleibt
+  gespeichert. Beide Modi erfüllen WCAG AA beim Kontrast (automatisch getestet).
+- **Avatar:** „Eigenes Bild wählen“ lädt ein Bild hoch. Es wird auf 256 px verkleinert und
+  bleibt nur auf diesem Gerät. „Standard-Avatar“ stellt den Platzhalter wieder her.
+
+Während Missa tippt, „atmet“ ihr Avatar leicht. Auf dem leeren Bildschirm begrüsst sie
+dich je nach Tageszeit („Na, schon wach?“ am Morgen, „Noch auf?“ spät nachts). Die Texte
+stehen in `src/config/greetings.json` und lassen sich dort leicht ändern.
+
+Wer im System „Bewegung reduzieren“ eingeschaltet hat, sieht keine Animationen.
+
+Die Schrift (Nunito) ist mitgebaut und wird nicht aus dem Internet geladen.
+
 ## PIN-Sperre
 
 Mit PIN wird der Key mit **PBKDF2 (600 000 Runden, SHA-256) und AES-GCM** verschlüsselt
