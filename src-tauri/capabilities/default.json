@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "So wenig wie möglich: die Seite darf nur Benachrichtigungen zeigen. Kein Dateisystem, keine Shell, kein HTTP über Tauri – der Serverkontakt läuft wie im Browser per fetch (src/lib/api/).",
+  "windows": ["main"],
+  "permissions": [
+    "notification:allow-is-permission-granted",
+    "notification:allow-request-permission",
+    "notification:allow-notify"
+  ]
+}

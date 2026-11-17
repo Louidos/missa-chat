@@ -21,3 +21,8 @@ Thumbs.db
 !.vscode/extensions.json
 .idea/
 *.log
+
+# Windows-App (Tauri)
+dist-desktop/
+src-tauri/target/
+src-tauri/gen/

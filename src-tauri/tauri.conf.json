@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Missa",
+  "mainBinaryName": "Missa",
+  "version": "../package.json",
+  "identifier": "ch.louis-degiorgi.missa-chat",
+  "build": {
+    "frontendDist": "../dist-desktop",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run dev:desktop",
+    "beforeBuildCommand": "npm run build:desktop"
+  },
+  "app": {
+    "windows": [],
+    "withGlobalTauri": false,
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Louis Degiorgi",
+    "shortDescription": "Chat mit Missa",
+    "longDescription": "Chat-App für Missa, die selbstgehostete KI-Assistentin",
+    "copyright": "MIT-Lizenz",
+    "category": "Productivity",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.png", "icons/icon.ico"],
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["German"],
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico",
+        "compression": "lzma"
+      }
+    }
+  }
+}

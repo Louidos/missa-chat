@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { IS_DESKTOP } from '../lib/platform';
   import { prefs } from '../lib/prefs.svelte';
   import { speech } from '../lib/speech.svelte';
   import ShortcutsDialog from './ShortcutsDialog.svelte';
@@ -19,7 +20,9 @@
     const permission = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
     if (permission !== 'granted') {
       box.checked = false;
-      notifyError = 'Der Browser hat Benachrichtigungen nicht erlaubt. Das lässt sich in den Website-Einstellungen ändern.';
+      notifyError = IS_DESKTOP
+        ? 'Windows hat Benachrichtigungen nicht erlaubt. Das lässt sich unter Einstellungen → System → Benachrichtigungen ändern.'
+        : 'Der Browser hat Benachrichtigungen nicht erlaubt. Das lässt sich in den Website-Einstellungen ändern.';
       await prefs.update({ notify: false });
       return;
     }

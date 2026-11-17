@@ -7,6 +7,10 @@ die Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
 ## Unveröffentlicht
 
+### Hinzugefügt
+
+- Missa-Chat gibt es als Windows-App: kleine `setup.exe`, Installation ohne Admin-Rechte, eigenes Fenster, startet schnell und merkt sich Grösse und Position (#23)
+
 ### Behoben
 
 - Wer während einer Antwort nach oben scrollt, wird nicht mehr nach unten zurückgerissen – auch nicht auf langsameren Geräten (#25)
