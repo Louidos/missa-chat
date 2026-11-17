@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { avatar } from '../lib/avatar.svelte';
   import { chat } from '../lib/chat.svelte';
   import { network } from '../lib/network.svelte';
   import { session } from '../lib/session.svelte';
@@ -66,14 +67,21 @@
 <div class="chat">
   <header class="topbar">
     <div class="title">
-      <h1>Missa</h1>
-      <StatusBadge />
+      <img class="head-avatar" src={avatar.url} alt="" width="36" height="36" />
+      <div class="name">
+        <h1>Missa</h1>
+        <StatusBadge />
+      </div>
     </div>
     <div class="actions">
       {#if session.hasPin}
-        <button type="button" onclick={() => session.lock()}>Sperren</button>
+        <button type="button" class="icon" onclick={() => session.lock()} aria-label="Sperren" title="Sperren">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></svg>
+        </button>
       {/if}
-      <button type="button" onclick={onsettings}>Einstellungen</button>
+      <button type="button" class="icon" onclick={onsettings} aria-label="Einstellungen" title="Einstellungen">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" /></svg>
+      </button>
     </div>
   </header>
 
@@ -126,6 +134,24 @@
   }
   .actions {
     flex: none;
+  }
+  .head-avatar {
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .name {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0.1rem;
+  }
+  .name h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    line-height: 1.2;
   }
   .linkerror {
     display: flex;

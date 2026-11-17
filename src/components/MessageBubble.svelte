@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { avatar } from '../lib/avatar.svelte';
   import { copyText } from '../lib/clipboard';
   import { renderMarkdown } from '../lib/markdown';
   import type { ChatMessage } from '../lib/storage/conversations';
@@ -69,7 +70,14 @@
 
 <li class="msg" class:mine data-role={message.role} data-status={message.status}>
   {#if !mine}
-    <img class="avatar" src="/avatar.svg" alt="" width="36" height="36" />
+    <img
+      class="avatar"
+      class:breathing={message.status === 'streaming'}
+      src={avatar.url}
+      alt=""
+      width="36"
+      height="36"
+    />
   {/if}
   <div class="col">
     <div class="bubble">
@@ -134,7 +142,9 @@
     width: 2.25rem;
     height: 2.25rem;
     border-radius: 50%;
+    object-fit: cover;
     margin-top: 0.15rem;
+    box-shadow: 0 0 0 2px var(--surface);
   }
   .col {
     display: flex;
@@ -146,16 +156,17 @@
     align-items: flex-end;
   }
   .bubble {
-    padding: 0.6rem 0.9rem;
-    border-radius: 1.1rem 1.1rem 1.1rem 0.3rem;
+    padding: 0.65rem 0.95rem;
+    border-radius: 1.3rem 1.3rem 1.3rem 0.4rem;
     background: var(--bubble-missa);
+    box-shadow: var(--shadow-soft);
     color: var(--text);
     overflow-wrap: anywhere;
     min-width: 0;
     max-width: 100%;
   }
   .mine .bubble {
-    border-radius: 1.1rem 1.1rem 0.3rem 1.1rem;
+    border-radius: 1.3rem 1.3rem 0.4rem 1.3rem;
     background: var(--bubble-me);
     color: var(--bubble-me-text);
   }

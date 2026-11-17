@@ -53,6 +53,12 @@ class Session {
   #pinFailures = 0;
   #onReset: Array<() => void> = [];
   #onConnected: Array<() => void> = [];
+  #onLogout: Array<() => void> = [];
+
+  /** Wird nur beim Abmelden aufgerufen (nicht beim Sperren). */
+  onLogout(fn: () => void): void {
+    this.#onLogout.push(fn);
+  }
 
   /** Wird aufgerufen, sobald die Verbindung (wieder) steht. */
   onConnected(fn: () => void): void {
@@ -212,6 +218,7 @@ class Session {
   /** Abmelden: löscht Key, Einstellungen und Verlauf. */
   async logout(): Promise<void> {
     for (const fn of this.#onReset) fn();
+    for (const fn of this.#onLogout) fn();
     await wipeAll();
     this.#apiKey = null;
     this.#pin = null;

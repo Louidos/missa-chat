@@ -1,5 +1,6 @@
 <script lang="ts">
   import { session } from '../lib/session.svelte';
+  import AppearanceSettings from './AppearanceSettings.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import ConnectForm from './ConnectForm.svelte';
 
@@ -38,6 +39,8 @@
       </div>
     </section>
   {/if}
+
+  <AppearanceSettings />
 
   <section class="card">
     <h2>Abmelden</h2>

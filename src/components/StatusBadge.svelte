@@ -28,8 +28,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.9rem;
-    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+    padding: 0.1rem 0.55rem;
     border-radius: 999px;
     background: var(--surface-2);
     justify-self: start;

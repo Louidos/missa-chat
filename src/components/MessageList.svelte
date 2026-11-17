@@ -1,6 +1,8 @@
 <script lang="ts">
   import { tick, untrack } from 'svelte';
+  import { avatar } from '../lib/avatar.svelte';
   import { chat } from '../lib/chat.svelte';
+  import { greetingFor } from '../lib/greetings';
   import MessageBubble from './MessageBubble.svelte';
 
   interface Props {
@@ -9,6 +11,7 @@
   let { onedit }: Props = $props();
 
   let el: HTMLDivElement | undefined = $state();
+  const greeting = greetingFor(new Date());
   let atBottom = $state(true);
   let prevCount = 0;
 
@@ -44,8 +47,9 @@
 <div class="scroller" bind:this={el} onscroll={measure} role="log" aria-label="Gespräch mit Missa" aria-live="off">
   {#if chat.messages.length === 0}
     <div class="empty">
-      <img src="/avatar.svg" alt="" width="72" height="72" />
-      <p>Schreib Missa etwas.</p>
+      <img class="avatar-big" src={avatar.url} alt="" width="96" height="96" />
+      <p class="greeting">{greeting}</p>
+      <p class="muted">Schreib Missa etwas.</p>
     </div>
   {:else}
     <ol class="list">
@@ -92,6 +96,22 @@
     justify-items: center;
     color: var(--muted);
     text-align: center;
+  }
+  .avatar-big {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: var(--shadow-soft);
+  }
+  .greeting {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0.75rem 0 0;
+  }
+  .empty .muted {
+    margin: 0.25rem 0 0;
   }
   .to-bottom {
     position: absolute;
