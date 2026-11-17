@@ -91,7 +91,7 @@ freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
 - [x] Installierbar & offline-fest (PWA) mit Warteschlange und Update-Hinweis
 - [x] Missas Look (hell/dunkel, eigener Avatar, Tageszeit-Begrüssung)
 - [x] Verlauf, Suche (Ctrl+K), Export als Markdown und JSON
-- [ ] Schnellbefehle & Notfall-Knopf
+- [x] Schnellbefehle mit /, Ja/Nein-Knöpfe und Notfall-Knopf
 - [ ] Bilder & Dateien anhängen
 - [ ] Extras
 

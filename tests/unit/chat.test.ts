@@ -135,3 +135,22 @@ describe('Chat', () => {
     expect(saved.messages).toHaveLength(0);
   });
 });
+
+describe('stopAndWait', () => {
+  it('wartet, bis die laufende Antwort beendet ist – danach kann sofort gesendet werden', async () => {
+    api((_b, init) => sse(['Eins ', 'Zwei ', 'Drei ', 'Vier'], { signal: init.signal }));
+    const p = chat.send('lang');
+    await vi.waitFor(() => expect(chat.messages.at(-1)?.content).toContain('Eins'));
+    await chat.stopAndWait();
+    expect(chat.streaming).toBe(false);
+    api(() => sse(['Angehalten.']));
+    await chat.send('Notfall-Stopp');
+    await p;
+    expect(chat.messages.map((m) => [m.content, m.status])).toEqual([
+      ['lang', 'done'],
+      [expect.stringContaining('Eins'), 'stopped'],
+      ['Notfall-Stopp', 'done'],
+      ['Angehalten.', 'done'],
+    ]);
+  });
+});

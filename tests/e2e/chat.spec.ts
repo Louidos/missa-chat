@@ -67,7 +67,7 @@ test('Tipp-Animation erscheint vor der ersten Antwort', async ({ page }) => {
 test('Stopp bricht ab, der bisherige Text bleibt', async ({ page }) => {
   await send(page, '#lang');
   await expect(lastMissa(page)).toContainText('Wort3');
-  await page.getByRole('button', { name: 'Stopp' }).click();
+  await page.getByRole('button', { name: 'Stopp', exact: true }).click();
   await expect(lastMissa(page)).toHaveAttribute('data-status', 'stopped');
   await expect(lastMissa(page)).toContainText('Abgebrochen.');
   const text = await lastMissa(page).locator('.md').innerText();
@@ -172,7 +172,7 @@ test('Wer nach oben scrollt, wird nicht zurückgerissen; „Nach unten“ ersche
   expect(await log.evaluate((el) => el.scrollTop)).toBeLessThan(50);
   await page.getByRole('button', { name: 'Nach unten scrollen' }).click();
   await expect(page.getByRole('button', { name: 'Nach unten scrollen' })).toBeHidden();
-  await page.getByRole('button', { name: 'Stopp' }).click();
+  await page.getByRole('button', { name: 'Stopp', exact: true }).click();
   // kein waagrechtes Scrollen am Handy
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth),

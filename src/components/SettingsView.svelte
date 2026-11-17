@@ -1,6 +1,7 @@
 <script lang="ts">
   import { session } from '../lib/session.svelte';
   import AppearanceSettings from './AppearanceSettings.svelte';
+  import CommandSettings from './CommandSettings.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import ConnectForm from './ConnectForm.svelte';
   import DataSettings from './DataSettings.svelte';
@@ -42,6 +43,8 @@
   {/if}
 
   <AppearanceSettings />
+
+  <CommandSettings />
 
   <DataSettings />
 

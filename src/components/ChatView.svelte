@@ -2,9 +2,13 @@
   import { onMount } from 'svelte';
   import { avatar } from '../lib/avatar.svelte';
   import { chat } from '../lib/chat.svelte';
+  import { commandStore } from '../lib/commandStore.svelte';
+  import { EMERGENCY_TEXT, expand, parseCommand } from '../lib/commands';
   import { network } from '../lib/network.svelte';
   import { session } from '../lib/session.svelte';
   import Composer from './Composer.svelte';
+  import ConfirmDialog from './ConfirmDialog.svelte';
+  import QuickBar from './QuickBar.svelte';
   import MessageList from './MessageList.svelte';
   import SearchDialog from './SearchDialog.svelte';
   import Sidebar from './Sidebar.svelte';
@@ -21,6 +25,9 @@
   let composer: Composer | undefined = $state();
   let loadError = $state('');
   let drawer = $state(false);
+  let commandHint = $state('');
+  let confirmEmergency = $state(false);
+  let emergency = $state<{ state: 'sending' | 'done' | 'error' | 'queued'; text: string } | null>(null);
   let searchOpen = $state(false);
 
   onMount(() => {
@@ -30,6 +37,31 @@
     composer?.focus();
   });
 
+  /** Sendet Text oder führt einen Slash-Befehl aus. */
+  function sendText(input: string) {
+    commandHint = '';
+    let text = input;
+    const parsed = parseCommand(input, commandStore.list);
+    if (parsed) {
+      const { command, args } = parsed;
+      if (command.action === 'neues-gespraech') {
+        void commandStore.recordUse(command.name);
+        void chat.startNew();
+        return;
+      }
+      const expanded = expand(command, args);
+      if (!expanded) {
+        draft = `/${command.name} `;
+        commandHint = `/${command.name} braucht noch etwas dahinter: ${command.placeholder ?? 'Text'}`;
+        composer?.focus();
+        return;
+      }
+      void commandStore.recordUse(command.name);
+      text = expanded;
+    }
+    void chat.send(text);
+  }
+
   function submit() {
     const text = draft;
     draft = '';
@@ -37,7 +69,25 @@
       editing = false;
       void chat.editLast(text);
     } else {
-      void chat.send(text);
+      sendText(text);
+    }
+  }
+
+  async function sendEmergency() {
+    // Laufende Antwort wirklich beenden, sonst würde der Notfall-Stopp nicht gesendet.
+    await chat.stopAndWait();
+    emergency = { state: 'sending', text: '' };
+    await chat.send(EMERGENCY_TEXT);
+    const last = chat.messages.at(-1);
+    if (last?.role === 'user' && last.status === 'queued') {
+      emergency = {
+        state: 'queued',
+        text: 'Keine Verbindung! Der Notfall-Stopp wartet und geht raus, sobald die Verbindung steht.',
+      };
+    } else if (last?.role === 'assistant' && last.status === 'done') {
+      emergency = { state: 'done', text: last.content };
+    } else {
+      emergency = { state: 'error', text: last?.error ?? 'Der Notfall-Stopp konnte nicht bestätigt werden.' };
     }
   }
 
@@ -103,6 +153,15 @@
       </div>
     </div>
     <div class="actions">
+      <button
+        type="button"
+        class="icon emergency"
+        onclick={() => (confirmEmergency = true)}
+        aria-label="Notfall-Stopp"
+        title="Notfall-Stopp"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 2h8l6 6v8l-6 6H8l-6-6V8z" /><path d="M12 7v6M12 16.5v.5" /></svg>
+      </button>
       {#if session.hasPin}
         <button type="button" class="icon" onclick={() => session.lock()} aria-label="Sperren" title="Sperren">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></svg>
@@ -127,7 +186,22 @@
     </div>
   {/if}
 
+  {#if emergency}
+    <div class="emergency-result" role="alert" data-state={emergency.state}>
+      <strong>
+        {#if emergency.state === 'sending'}Notfall-Stopp wird gesendet …{:else if emergency.state === 'done'}Notfall-Stopp gesendet – Missa antwortet:{:else if emergency.state === 'queued'}Notfall-Stopp wartet!{:else}Notfall-Stopp: Fehler{/if}
+      </strong>
+      {#if emergency.text}<p>{emergency.text}</p>{/if}
+      {#if emergency.state !== 'sending'}
+        <button type="button" onclick={() => (emergency = null)}>Schliessen</button>
+      {/if}
+    </div>
+  {/if}
+
   <MessageList onedit={startEdit} />
+
+  {#if commandHint}<p class="command-hint" role="status">{commandHint}</p>{/if}
+  <QuickBar {draft} onsend={(t) => sendText(t)} onfill={(t) => ((draft = t), composer?.focus())} />
 
   <Composer
     bind:this={composer}
@@ -143,6 +217,15 @@
 </div>
 
 <SearchDialog bind:open={searchOpen} />
+
+<ConfirmDialog
+  bind:open={confirmEmergency}
+  title="Notfall-Stopp senden?"
+  message={`Missa bekommt sofort die Nachricht „${EMERGENCY_TEXT}“ und soll alles anhalten, was gerade läuft.`}
+  confirmLabel="Ja, Notfall-Stopp senden"
+  danger
+  onconfirm={sendEmergency}
+/>
 
 <style>
   .layout {
@@ -250,5 +333,30 @@
   }
   .notice {
     margin: 0 0 0.5rem;
+  }
+  .emergency {
+    background: var(--danger);
+    color: var(--surface);
+    border-color: transparent;
+  }
+  .emergency-result {
+    border: 3px solid var(--danger);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .emergency-result strong {
+    color: var(--danger);
+    font-size: 1.1rem;
+  }
+  .emergency-result p {
+    margin: 0.4rem 0;
+    white-space: pre-wrap;
+  }
+  .command-hint {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--muted);
   }
 </style>

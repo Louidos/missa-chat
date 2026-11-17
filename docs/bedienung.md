@@ -43,7 +43,36 @@ Erlaubt sind nur `https://`-Adressen. Ausnahme: `http://localhost` zum Entwickel
 - Der Verlauf wird lokal gespeichert und übersteht Neuladen. Mehrere Gespräche kommen
   mit einer späteren Version.
 
-### Gespräche, Suche, Export
+### Schnellbefehle und Notfall-Knopf
+
+Tippe **/** ins Eingabefeld: Eine Liste mit Befehlen erscheint (Pfeiltasten, Enter oder
+Tab wählt, Esc schliesst). Jeder Befehl wird als normale Nachricht an Missa gesendet:
+
+| Befehl                        | sendet                                     |
+| ----------------------------- | ------------------------------------------ |
+| `/heute`                      | Was steht heute an?                        |
+| `/morgen`                     | Was steht morgen an?                       |
+| `/erinnerung <Zeit> <Text>`   | Erstelle eine Erinnerung: <Zeit> <Text>    |
+| `/termin <Text>`              | Trag diesen Termin ein: <Text>             |
+| `/server`                     | Wie geht's den Servern?                    |
+| `/notiz <Text>`               | Notiere: <Text>                            |
+| `/neu`                        | (beginnt ein neues Gespräch, sendet nichts) |
+
+Die Standard-Befehle stehen in `src/config/commands.json`. Unter **Einstellungen →
+Schnellbefehle** lassen sie sich ändern, löschen und um eigene ergänzen (`{text}` im
+Text wird durch das ersetzt, was nach dem Befehl steht).
+
+Über dem Eingabefeld stehen die **drei meistgenutzten Befehle** als Knöpfe. Ist das Feld
+leer und war Missas letzte Antwort eine Ja/Nein-Rückfrage, stehen dort stattdessen
+**Ja** und **Nein**. Die Erkennung ist bewusst einfach und kann danebenliegen. Die Knöpfe
+senden nur den Text.
+
+Der **rote Notfall-Knopf** oben fragt nach und sendet dann „Notfall-Stopp“ an Missa
+(eine laufende Antwort wird vorher gestoppt). Das Ergebnis erscheint rot umrandet oben im
+Chat. Ohne Verbindung wartet der Notfall-Stopp in der Warteschlange, und das wird deutlich
+angezeigt.
+
+## Gespräche, Suche, Export
 
 - **Seitenleiste** (am Laptop links, am Handy über ☰ ausklappbar): alle Gespräche,
   angeheftete oben, dann die zuletzt benutzten. **+ Neues Gespräch** startet ein leeres
@@ -93,6 +122,35 @@ versuchen“).
 
 Gibt es eine **neue Version**, erscheint oben „Neue Version verfügbar“ mit
 **Neu laden**.
+
+## Schnellbefehle und Notfall-Knopf
+
+Tippe **/** ins Eingabefeld: Eine Liste mit Befehlen erscheint (Pfeiltasten, Enter oder
+Tab wählt, Esc schliesst). Jeder Befehl wird als normale Nachricht an Missa gesendet:
+
+| Befehl                        | sendet                                     |
+| ----------------------------- | ------------------------------------------ |
+| `/heute`                      | Was steht heute an?                        |
+| `/morgen`                     | Was steht morgen an?                       |
+| `/erinnerung <Zeit> <Text>`   | Erstelle eine Erinnerung: <Zeit> <Text>    |
+| `/termin <Text>`              | Trag diesen Termin ein: <Text>             |
+| `/server`                     | Wie geht's den Servern?                    |
+| `/notiz <Text>`               | Notiere: <Text>                            |
+| `/neu`                        | (beginnt ein neues Gespräch, sendet nichts) |
+
+Die Standard-Befehle stehen in `src/config/commands.json`. Unter **Einstellungen →
+Schnellbefehle** lassen sie sich ändern, löschen und um eigene ergänzen (`{text}` im
+Text wird durch das ersetzt, was nach dem Befehl steht).
+
+Über dem Eingabefeld stehen die **drei meistgenutzten Befehle** als Knöpfe. Ist das Feld
+leer und war Missas letzte Antwort eine Ja/Nein-Rückfrage, stehen dort stattdessen
+**Ja** und **Nein**. Die Erkennung ist bewusst einfach und kann danebenliegen. Die Knöpfe
+senden nur den Text.
+
+Der **rote Notfall-Knopf** oben fragt nach und sendet dann „Notfall-Stopp“ an Missa
+(eine laufende Antwort wird vorher gestoppt). Das Ergebnis erscheint rot umrandet oben im
+Chat. Ohne Verbindung wartet der Notfall-Stopp in der Warteschlange, und das wird deutlich
+angezeigt.
 
 ## Gespräche, Suche, Export
 

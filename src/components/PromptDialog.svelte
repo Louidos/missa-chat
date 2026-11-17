@@ -8,6 +8,7 @@
     onconfirm: (value: string) => void | Promise<void>;
   }
   let { open = $bindable(false), title, label, value, confirmLabel, onconfirm }: Props = $props();
+  const uid = $props.id();
   let dialog: HTMLDialogElement | undefined = $state();
   let text = $state('');
 
@@ -28,12 +29,12 @@
   }
 </script>
 
-<dialog bind:this={dialog} onclose={() => (open = false)} aria-labelledby="prompt-title">
+<dialog bind:this={dialog} onclose={() => (open = false)} aria-labelledby="prompt-title-{uid}">
   <form onsubmit={submit}>
-    <h2 id="prompt-title">{title}</h2>
+    <h2 id="prompt-title-{uid}">{title}</h2>
     <div class="field">
-      <label for="prompt-input">{label}</label>
-      <input id="prompt-input" type="text" bind:value={text} maxlength="120" />
+      <label for="prompt-input-{uid}">{label}</label>
+      <input id="prompt-input-{uid}" type="text" bind:value={text} maxlength="120" />
     </div>
     <div class="actions">
       <button type="button" onclick={() => (open = false)}>Abbrechen</button>

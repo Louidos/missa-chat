@@ -37,6 +37,8 @@ class Chat {
   focusMessageId = $state<string | null>(null);
 
   #abort: AbortController | null = null;
+  /** Wird erfüllt, sobald die laufende Antwort ganz beendet ist. */
+  #running: Promise<void> = Promise.resolve();
   #flushing = false;
   #retryTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -248,6 +250,12 @@ class Chat {
     this.#abort?.abort();
   }
 
+  /** Stoppt eine laufende Antwort und wartet, bis sie wirklich beendet ist. */
+  async stopAndWait(): Promise<void> {
+    this.stop();
+    await this.#running;
+  }
+
   /** Antwort-Platzhalter ohne Inhalt entfernen und die letzte eigene Nachricht wartend markieren. */
   #requeueLast(): void {
     const last = this.messages.at(-1);
@@ -289,6 +297,8 @@ class Chat {
     this.streaming = true;
     const abort = new AbortController();
     this.#abort = abort;
+    let finished!: () => void;
+    this.#running = new Promise<void>((r) => (finished = r));
     void this.#save();
     let failed: ApiErrorKind | null = null;
 
@@ -329,6 +339,7 @@ class Chat {
       this.streaming = false;
       this.#abort = null;
       await this.#save();
+      finished();
     }
     return failed;
   }
