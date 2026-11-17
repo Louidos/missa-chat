@@ -14,10 +14,23 @@
   const greeting = greetingFor(new Date());
   let atBottom = $state(true);
   let prevCount = 0;
+  /** scrollTop nach dem letzten automatischen Mitscrollen (oder als man selbst unten war). */
+  let followTop = -1;
+  let prevConv: string | undefined;
 
   function measure() {
     if (!el) return;
     atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    if (atBottom) followTop = el.scrollTop;
+  }
+
+  /**
+   * Hat man seit dem letzten Mitscrollen selbst nach oben gescrollt? Wird direkt an
+   * scrollTop gemessen, nicht erst im (späteren) scroll-Event – sonst reisst ein Wort,
+   * das vor dem Event eintrifft, einen wieder nach unten.
+   */
+  function scrolledUp(): boolean {
+    return !!el && followTop >= 0 && el.scrollTop < followTop - 2;
   }
 
   function scrollToBottom(smooth = false) {
@@ -33,15 +46,24 @@
     const last = chat.messages.at(-1);
     void last?.content;
     void last?.status;
-    void chat.conversation.id;
+    const conv = chat.conversation.id;
+    if (conv !== prevConv) {
+      // Anderes Gespräch: neu unten anfangen.
+      prevConv = conv;
+      followTop = -1;
+    }
     const force = count > prevCount && chat.messages.some((m, i) => i >= prevCount && m.role === 'user');
     prevCount = count;
     if (untrack(() => chat.focusMessageId)) return;
-    if (force || untrack(() => atBottom)) {
+    if (force || (untrack(() => atBottom) && !scrolledUp())) {
       void tick().then(() => {
+        if (!force && scrolledUp()) return measure();
         scrollToBottom();
+        if (el) followTop = el.scrollTop;
         atBottom = true;
       });
+    } else {
+      measure();
     }
   });
 

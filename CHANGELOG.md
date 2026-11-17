@@ -7,6 +7,10 @@ die Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
 ## Unveröffentlicht
 
+### Behoben
+
+- Wer während einer Antwort nach oben scrollt, wird nicht mehr nach unten zurückgerissen – auch nicht auf langsameren Geräten (#25)
+
 ## 0.3.0 – 2026-11-17
 
 ### Hinzugefügt
