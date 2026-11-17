@@ -6,6 +6,9 @@
   import UnlockView from './components/UnlockView.svelte';
   import UpdateBanner from './components/UpdateBanner.svelte';
   import { avatar } from './lib/avatar.svelte';
+  import { chat } from './lib/chat.svelte';
+  import { showAnswerNotification } from './lib/notify';
+  import { speech } from './lib/speech.svelte';
   import { prefs } from './lib/prefs.svelte';
   import { session } from './lib/session.svelte';
 
@@ -15,10 +18,16 @@
 
   onMount(() => {
     session.onLogout(() => {
+      speech.stop();
       prefs.reset();
       avatar.reset();
     });
     void prefs.load().catch(() => {});
+    speech.init();
+    chat.onAnswer((m) => {
+      if (prefs.value.ttsAuto && speech.available) speech.speak(m.id, m.content);
+      void showAnswerNotification(prefs.value, m.content).catch(() => {});
+    });
     void avatar.load().catch(() => {});
     session.init().catch(() => {
       loadError =

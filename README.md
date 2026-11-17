@@ -93,7 +93,7 @@ freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
 - [x] Verlauf, Suche (Ctrl+K), Export als Markdown und JSON
 - [x] Schnellbefehle mit /, Ja/Nein-Knöpfe und Notfall-Knopf
 - [x] Bilder, Screenshots (Ctrl+V) und Textdateien anhängen
-- [ ] Extras
+- [x] Extras: Vorlesen mit lokalen Stimmen, Benachrichtigungen, Nerd-Statistik, Tastenkürzel, Entwürfe
 
 Änderungen stehen im [CHANGELOG](CHANGELOG.md).
 

@@ -78,6 +78,8 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/v1\//],
         runtimeCaching: [],
         cleanupOutdatedCaches: true,
+        // Klick auf eine Benachrichtigung öffnet die App (public/sw-notifications.js).
+        importScripts: ['sw-notifications.js'],
         clientsClaim: true,
         skipWaiting: false,
       },

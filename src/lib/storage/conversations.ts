@@ -1,3 +1,4 @@
+import type { AnswerStats } from '../stats';
 import { getDb } from './db';
 
 /** queued = eigene Nachricht wartet offline auf Verbindung (Warteschlange). */
@@ -20,6 +21,8 @@ export interface ChatMessage {
   attachments?: Attachment[];
   /** Freundlicher Hinweis zur Nachricht (z. B. Bild nicht gesendet). */
   notice?: string;
+  /** Messwerte zur Antwort (Nerd-Statistik). */
+  stats?: AnswerStats;
 }
 
 export interface Conversation {

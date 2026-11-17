@@ -13,6 +13,7 @@ die Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 - Mehrere Gespräche, Suche im Verlauf und Export: Seitenleiste mit neuen, umbenennbaren, anheftbaren und löschbaren Gesprächen, Volltextsuche mit Ctrl+K samt Hervorhebung, Export als Markdown und Sicherung/Import aller Daten als JSON ohne Key (#13)
 - Schnellbefehle mit /, Ja/Nein-Knöpfe und Notfall-Knopf: Vorschlagsliste beim Tippen von /, eigene Befehle in den Einstellungen, Schnellknöpfe für die meistgenutzten Befehle, Ja/Nein bei Rückfragen und ein roter Notfall-Stopp mit Rückfrage (#14)
 - Bilder, Screenshots und Textdateien anhängen: per Knopf, Drag & Drop oder Ctrl+V, mit Vorschau, automatisch auf 1600 px verkleinert; kann das Modell keine Bilder, kommt ein freundlicher Hinweis und der Text geht trotzdem raus (#15)
+- Vorlesen mit lokalen Stimmen, Benachrichtigungen, Statistik und gespeicherte Entwürfe: Antworten vorlesen nur mit Stimmen auf dem Gerät, Benachrichtigung bei fertiger Antwort im Hintergrund, ein-/ausblendbare Nerd-Statistik, Tastenkürzel-Übersicht mit ? und Entwürfe pro Gespräch (#16)
 
 ## 0.2.0 – 2026-11-16
 

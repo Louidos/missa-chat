@@ -1,6 +1,8 @@
 import { ApiError, streamChat, type ApiErrorKind, type ChatMessageInput, type PartialApiError } from './api';
 import { hasImages, toApiMessage } from './attachments';
+import { saveDraft } from './drafts';
 import { history } from './history.svelte';
+import { computeStats } from './stats';
 import { network } from './network.svelte';
 import { session } from './session.svelte';
 import {
@@ -42,6 +44,7 @@ class Chat {
   focusMessageId = $state<string | null>(null);
 
   #abort: AbortController | null = null;
+  #onAnswer: Array<(m: ChatMessage) => void> = [];
   /** Modelle, die keine Bilder verstehen (in dieser Sitzung gelernt). */
   #noVision = new Set<string>();
   /** Wird erfüllt, sobald die laufende Antwort ganz beendet ist. */
@@ -55,6 +58,11 @@ class Chat {
     network.onOnline(() => {
       if (this.queued.length > 0) void session.refreshLink();
     });
+  }
+
+  /** Wird nach jeder vollständig empfangenen Antwort aufgerufen (Vorlesen, Benachrichtigung). */
+  onAnswer(fn: (m: ChatMessage) => void): void {
+    this.#onAnswer.push(fn);
   }
 
   get messages(): ChatMessage[] {
@@ -135,6 +143,7 @@ class Chat {
       await deleteConversation(id);
       history.remove(id);
     }
+    await saveDraft(id, '');
   }
 
   async #patch(id: string, patch: Partial<Conversation>): Promise<void> {
@@ -325,17 +334,30 @@ class Chat {
         throw new ApiError(!network.online ? 'offline' : session.link === 'error' ? 'unreachable' : 'aborted');
       }
       if (abort.signal.aborted) throw new ApiError('aborted');
+      const endpoint = session.activeKind;
       for (;;) {
+        const start = performance.now();
+        let first: number | null = null;
         try {
-          await streamChat({
+          const result = await streamChat({
             baseUrl,
             apiKey,
             model: session.connection.model,
             messages: historyFor(withImages),
             signal: abort.signal,
             onDelta: (d) => {
+              first ??= performance.now();
               msg.content += d;
             },
+          });
+          msg.stats = computeStats({
+            start,
+            first,
+            end: performance.now(),
+            usageTokens: result.completionTokens,
+            chunks: result.chunks,
+            model: result.model ?? model,
+            endpoint,
           });
           break;
         } catch (e) {
@@ -350,6 +372,10 @@ class Chat {
         }
       }
       msg.status = 'done';
+      const done = msg;
+      queueMicrotask(() => {
+        for (const fn of this.#onAnswer) fn(done);
+      });
     } catch (e) {
       const err = e instanceof ApiError ? (e as PartialApiError) : new ApiError('interrupted');
       failed = err.kind;

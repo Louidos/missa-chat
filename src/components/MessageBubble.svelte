@@ -4,6 +4,9 @@
   import { renderMarkdown } from '../lib/markdown';
   import { fold, splitMatches } from '../lib/search';
   import { formatSize } from '../lib/attachments';
+  import { prefs } from '../lib/prefs.svelte';
+  import { speech } from '../lib/speech.svelte';
+  import { formatStats } from '../lib/stats';
   import type { ChatMessage } from '../lib/storage/conversations';
 
   interface Props {
@@ -156,6 +159,13 @@
           {copied ? 'Kopiert!' : 'Kopieren'}
         </button>
       {/if}
+      {#if !mine && speech.available && message.status !== 'streaming' && message.content}
+        {#if speech.speakingId === message.id}
+          <button type="button" class="mini" onclick={() => speech.stop()}>Vorlesen stoppen</button>
+        {:else}
+          <button type="button" class="mini" onclick={() => speech.speak(message.id, message.content)}>Vorlesen</button>
+        {/if}
+      {/if}
       {#if !mine && isLast && message.status !== 'streaming' && message.status !== 'error'}
         <button type="button" class="mini" onclick={onregenerate} disabled={busy}>Neu erzeugen</button>
       {/if}
@@ -170,6 +180,11 @@
         <button type="button" class="mini" onclick={onedit}>Bearbeiten</button>
       {/if}
     </div>
+    {#if !mine && prefs.value.nerdStats && message.stats}
+      <p class="stats" aria-label="Statistik zur Antwort">
+        {#each formatStats(message.stats) as part, i (i)}<span>{part}</span>{/each}
+      </p>
+    {/if}
   </div>
 </li>
 
@@ -281,6 +296,19 @@
     font-size: 0.8rem;
     color: var(--muted);
     padding: 0.2rem 0.4rem;
+  }
+  .stats {
+    margin: 0 0.4rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.6rem;
+  }
+  .stats span + span::before {
+    content: '·';
+    margin-right: 0.6rem;
   }
   .mini {
     min-height: 1.75rem;
