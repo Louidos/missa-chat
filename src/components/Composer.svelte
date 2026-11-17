@@ -1,6 +1,9 @@
 <script lang="ts">
   import { commandStore } from '../lib/commandStore.svelte';
   import { expand, needsArgs, suggestions, type Command } from '../lib/commands';
+  import { formatSize } from '../lib/attachments';
+  import { TEXT_EXTENSIONS } from '../config/limits';
+  import type { Attachment } from '../lib/storage/conversations';
 
   interface Props {
     value: string;
@@ -10,6 +13,10 @@
     onsubmit: () => void;
     onstop: () => void;
     oncanceledit: () => void;
+    attachments?: Attachment[];
+    busyFiles?: boolean;
+    onfiles?: (files: File[]) => void;
+    onremove?: (index: number) => void;
   }
   let {
     value = $bindable(''),
@@ -19,7 +26,28 @@
     onsubmit,
     onstop,
     oncanceledit,
+    attachments = [],
+    busyFiles = false,
+    onfiles,
+    onremove,
   }: Props = $props();
+
+  const accept = `image/*,${TEXT_EXTENSIONS.map((e) => `.${e}`).join(',')}`;
+  const canSend = $derived(!!value.trim() || attachments.length > 0);
+
+  function onpaste(e: ClipboardEvent) {
+    const files = [...(e.clipboardData?.files ?? [])];
+    if (files.length === 0) return;
+    e.preventDefault();
+    onfiles?.(files);
+  }
+
+  function onpick(e: Event) {
+    const input = e.currentTarget as HTMLInputElement;
+    const files = [...(input.files ?? [])];
+    input.value = '';
+    if (files.length) onfiles?.(files);
+  }
 
   let ta: HTMLTextAreaElement | undefined = $state();
 
@@ -83,13 +111,13 @@
     }
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
-      if (!streaming && value.trim()) onsubmit();
+      if (!streaming && (canSend || busyFiles)) onsubmit();
     }
   }
 
   function submit(e: SubmitEvent) {
     e.preventDefault();
-    if (!streaming && value.trim()) onsubmit();
+    if (!streaming && (canSend || busyFiles)) onsubmit();
   }
 </script>
 
@@ -118,13 +146,34 @@
       {/each}
     </ul>
   {/if}
+  {#if attachments.length > 0 || busyFiles}
+    <ul class="previews" aria-label="Anhänge">
+      {#each attachments as a, i (i)}
+        <li class="preview">
+          {#if a.kind === 'image'}
+            <img src={a.dataUrl} alt="Vorschau: {a.name}" />
+          {:else}
+            <span class="file" aria-hidden="true">📄</span>
+          {/if}
+          <span class="fname">{a.name}{#if a.kind === 'text'} · {formatSize(a.size)}{/if}</span>
+          <button type="button" class="remove" onclick={() => onremove?.(i)} aria-label="Anhang {a.name} entfernen">×</button>
+        </li>
+      {/each}
+      {#if busyFiles}<li class="preview muted" role="status">Lade Anhang …</li>{/if}
+    </ul>
+  {/if}
   <div class="row">
+    <label class="attach" title="Bild oder Datei anhängen">
+      <input type="file" multiple {accept} class="sr-only" onchange={onpick} aria-label="Bild oder Datei anhängen" />
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 01-7.8-7.8l8.6-8.6a3.7 3.7 0 015.2 5.2l-8.6 8.6a1.8 1.8 0 01-2.6-2.6l7.9-7.9" /></svg>
+    </label>
     <label class="sr-only" for="composer-input">Nachricht an Missa</label>
     <textarea
       id="composer-input"
       bind:this={ta}
       bind:value
       {onkeydown}
+      {onpaste}
       rows="1"
       placeholder="Nachricht an Missa … ( / für Befehle)"
       aria-describedby="composer-hint"
@@ -138,7 +187,7 @@
     {#if streaming}
       <button type="button" class="stop" onclick={onstop} aria-keyshortcuts="Escape">Stopp</button>
     {:else}
-      <button type="submit" class="primary" disabled={disabled || !value.trim()}>
+      <button type="submit" class="primary" disabled={disabled || !(canSend || busyFiles)}>
         {editing ? 'Neu senden' : 'Senden'}
       </button>
     {/if}
@@ -151,6 +200,71 @@
     position: relative;
     padding: 0.5rem 0 0.75rem;
     background: var(--bg);
+  }
+  .previews {
+    list-style: none;
+    margin: 0 0 0.4rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .preview {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.25rem 0.25rem 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--surface);
+    max-width: 100%;
+  }
+  .preview img {
+    width: 2.75rem;
+    height: 2.75rem;
+    object-fit: cover;
+    border-radius: 0.6rem;
+  }
+  .file {
+    font-size: 1.4rem;
+  }
+  .fname {
+    font-size: 0.85rem;
+    max-width: 12rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .remove {
+    min-height: 2rem;
+    width: 2rem;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 1.1rem;
+  }
+  .attach {
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    cursor: pointer;
+  }
+  .attach:focus-within {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .attach svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
   .suggestions {
     position: absolute;

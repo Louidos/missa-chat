@@ -17,6 +17,7 @@
  *   #abbruch  – Verbindung bricht mitten in der Antwort ab
  *   #fehler   – Server antwortet mit 500
  *   #frage    – Antwort ist eine Ja/Nein-Rückfrage
+ *   #keinbild – Modell ohne Bildfähigkeit: Anfragen mit Bildern → 400
  *   Notfall-Stopp – Bestätigung des Notfall-Stopps
  * CORS wie in docs/caddy-cors.md beschrieben: OPTIONS ohne Key, alles andere mit Key.
  */
@@ -61,9 +62,21 @@ function readBody(req) {
   });
 }
 
+function lastUser(messages) {
+  return [...(messages || [])].reverse().find((m) => m.role === 'user');
+}
+
+/** Text der letzten Nutzernachricht (auch im Teile-Format mit Bildern). */
 function lastUserText(messages) {
-  const last = [...(messages || [])].reverse().find((m) => m.role === 'user');
-  return typeof last?.content === 'string' ? last.content : '';
+  const c = lastUser(messages)?.content;
+  if (typeof c === 'string') return c;
+  if (Array.isArray(c)) return c.filter((p) => p.type === 'text').map((p) => p.text).join('\n');
+  return '';
+}
+
+function imageCount(messages) {
+  const c = lastUser(messages)?.content;
+  return Array.isArray(c) ? c.filter((p) => p.type === 'image_url').length : 0;
 }
 
 function replyFor(text) {
@@ -125,11 +138,17 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     const userText = lastUserText(body.messages);
+    const images = imageCount(body.messages);
+    if (userText.includes('#keinbild') && images > 0) {
+      json(res, 400, { error: { message: 'This model does not support image input (vision).', type: 'invalid_request_error' } });
+      return;
+    }
     if (userText.includes('#fehler')) {
       json(res, 500, { error: { message: 'Interner Fehler' } });
       return;
     }
-    const content = replyFor(userText);
+    const firstLine = userText.split('\n')[0];
+    const content = images > 0 ? `Ich sehe ${images} Bild${images > 1 ? 'er' : ''}. ${replyFor(firstLine)}` : replyFor(userText.includes('📎 Datei') ? `${firstLine} (mit Datei)` : userText);
     const delay = userText.includes('#lang') ? 60 : 30;
     const id = `chatcmpl-${Date.now()}`;
     if (!body.stream) {

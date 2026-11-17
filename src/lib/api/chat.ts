@@ -3,9 +3,14 @@ import { ApiError } from './errors';
 
 export type ChatRole = 'system' | 'user' | 'assistant';
 
+export type ContentPart =
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string } };
+
 export interface ChatMessageInput {
   role: ChatRole;
-  content: string;
+  /** Text, oder Teile (Text + Bilder) im OpenAI-Format. */
+  content: string | ContentPart[];
 }
 
 export interface StreamChatOptions {

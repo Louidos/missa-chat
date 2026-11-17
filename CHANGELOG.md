@@ -12,6 +12,7 @@ die Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 - Eigenes Missa-Design mit Avatar, hellem/dunklem Modus und Tageszeit-Begrüssung: warme, weiche Optik mit mitgebauter Schrift, Farbmodus automatisch oder von Hand, eigener Avatar hochladbar, Avatar „atmet“ beim Tippen, keine Animationen bei „Bewegung reduzieren“ (#12)
 - Mehrere Gespräche, Suche im Verlauf und Export: Seitenleiste mit neuen, umbenennbaren, anheftbaren und löschbaren Gesprächen, Volltextsuche mit Ctrl+K samt Hervorhebung, Export als Markdown und Sicherung/Import aller Daten als JSON ohne Key (#13)
 - Schnellbefehle mit /, Ja/Nein-Knöpfe und Notfall-Knopf: Vorschlagsliste beim Tippen von /, eigene Befehle in den Einstellungen, Schnellknöpfe für die meistgenutzten Befehle, Ja/Nein bei Rückfragen und ein roter Notfall-Stopp mit Rückfrage (#14)
+- Bilder, Screenshots und Textdateien anhängen: per Knopf, Drag & Drop oder Ctrl+V, mit Vorschau, automatisch auf 1600 px verkleinert; kann das Modell keine Bilder, kommt ein freundlicher Hinweis und der Text geht trotzdem raus (#15)
 
 ## 0.2.0 – 2026-11-16
 

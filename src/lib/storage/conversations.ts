@@ -3,6 +3,10 @@ import { getDb } from './db';
 /** queued = eigene Nachricht wartet offline auf Verbindung (Warteschlange). */
 export type MessageStatus = 'done' | 'streaming' | 'stopped' | 'error' | 'queued';
 
+export type Attachment =
+  | { kind: 'image'; name: string; dataUrl: string; width: number; height: number }
+  | { kind: 'text'; name: string; size: number; text: string };
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -12,6 +16,10 @@ export interface ChatMessage {
   /** Verständliche Fehlermeldung (nie mit Key). */
   error?: string;
   model?: string;
+  /** Angehängte Bilder und Textdateien (nur eigene Nachrichten). */
+  attachments?: Attachment[];
+  /** Freundlicher Hinweis zur Nachricht (z. B. Bild nicht gesendet). */
+  notice?: string;
 }
 
 export interface Conversation {

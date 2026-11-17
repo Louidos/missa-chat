@@ -14,7 +14,9 @@ export type ApiErrorKind =
   | 'server'
   | 'bad-response'
   | 'aborted'
-  | 'interrupted';
+  | 'interrupted'
+  | 'no-vision'
+  | 'rejected';
 
 export const CORS_DOC = 'docs/caddy-cors.md';
 
@@ -34,6 +36,8 @@ const MESSAGES: Record<ApiErrorKind, string> = {
   'bad-response': 'Der Server hat unerwartet geantwortet. Ist das wirklich die Missa-API?',
   aborted: 'Abgebrochen.',
   interrupted: 'Die Antwort wurde unterbrochen – die Verbindung ist mitten drin abgerissen.',
+  'no-vision': 'Dieses Modell kann leider keine Bilder ansehen.',
+  rejected: 'Missa hat die Anfrage abgelehnt.',
 };
 
 export class ApiError extends Error {
@@ -42,7 +46,7 @@ export class ApiError extends Error {
 
   constructor(kind: ApiErrorKind, status?: number) {
     const base = MESSAGES[kind];
-    super(status && kind === 'server' ? `${base} (Fehler ${status})` : base);
+    super(status && (kind === 'server' || kind === 'rejected') ? `${base} (Fehler ${status})` : base);
     this.name = 'ApiError';
     this.kind = kind;
     this.status = status;
