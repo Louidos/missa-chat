@@ -92,7 +92,7 @@ freigeben: [docs/caddy-cors.md](docs/caddy-cors.md).
 - [x] Missas Look (hell/dunkel, eigener Avatar, Tageszeit-Begrüssung)
 - [x] Verlauf, Suche (Ctrl+K), Export als Markdown und JSON
 - [x] Schnellbefehle mit /, Ja/Nein-Knöpfe und Notfall-Knopf
-- [ ] Bilder & Dateien anhängen
+- [x] Bilder, Screenshots (Ctrl+V) und Textdateien anhängen
 - [ ] Extras
 
 Änderungen stehen im [CHANGELOG](CHANGELOG.md).

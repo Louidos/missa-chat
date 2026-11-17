@@ -1,4 +1,5 @@
 import { ApiError, streamChat, type ApiErrorKind, type ChatMessageInput, type PartialApiError } from './api';
+import { hasImages, toApiMessage } from './attachments';
 import { history } from './history.svelte';
 import { network } from './network.svelte';
 import { session } from './session.svelte';
@@ -11,6 +12,7 @@ import {
   putConversations,
   saveConversation,
   setCurrentConversation,
+  type Attachment,
   type ChatMessage,
   type Conversation,
 } from './storage/conversations';
@@ -24,6 +26,9 @@ function titleFrom(text: string): string {
 const CONNECTIVITY: ApiErrorKind[] = ['offline', 'unreachable', 'timeout'];
 /** Fehler, nach denen die Verbindung neu geprüft wird (evtl. andere Adresse). */
 const RECHECK: ApiErrorKind[] = ['unreachable', 'timeout', 'cors', 'interrupted', 'offline'];
+/** Hinweis an einer Nachricht, deren Bild nicht gesendet werden konnte. */
+export const NO_VISION_NOTICE =
+  'Bild nicht gesendet: Dieses Modell kann leider keine Bilder ansehen. Der Text ging trotzdem an Missa.';
 /** Solange Nachrichten warten und das Gerät online ist: so oft neu probieren. */
 export const QUEUE_RETRY_MS = 20_000;
 
@@ -37,6 +42,8 @@ class Chat {
   focusMessageId = $state<string | null>(null);
 
   #abort: AbortController | null = null;
+  /** Modelle, die keine Bilder verstehen (in dieser Sitzung gelernt). */
+  #noVision = new Set<string>();
   /** Wird erfüllt, sobald die laufende Antwort ganz beendet ist. */
   #running: Promise<void> = Promise.resolve();
   #flushing = false;
@@ -161,11 +168,11 @@ class Chat {
     history.upsert(snap);
   }
 
-  async send(text: string): Promise<void> {
+  async send(text: string, attachments: Attachment[] = []): Promise<void> {
     const content = text.trim();
-    if (!content || this.streaming) return;
+    if ((!content && attachments.length === 0) || this.streaming) return;
     if (this.messages.length === 0 && !this.conversation.customTitle) {
-      this.conversation.title = titleFrom(content);
+      this.conversation.title = titleFrom(content || attachments.map((a) => a.name).join(', '));
     }
     this.highlight = '';
     const msg: ChatMessage = {
@@ -174,6 +181,7 @@ class Chat {
       content,
       createdAt: new Date().toISOString(),
       status: 'done',
+      ...(attachments.length ? { attachments } : {}),
     };
     // Offline oder es warten schon Nachrichten: hinten anstellen (Reihenfolge bleibt).
     if (!network.online || this.queued.length > 0) {
@@ -240,10 +248,12 @@ class Chat {
   async editLast(text: string): Promise<void> {
     const content = text.trim();
     const idx = this.lastUserIndex;
-    if (!content || idx < 0 || this.streaming) return;
+    if (idx < 0 || this.streaming) return;
+    const attachments = $state.snapshot(this.messages[idx].attachments ?? []) as Attachment[];
+    if (!content && attachments.length === 0) return;
     this.messages.splice(idx);
     if (idx === 0 && !this.conversation.customTitle) this.conversation.title = titleFrom(content);
-    await this.send(content);
+    await this.send(content, attachments);
   }
 
   stop(): void {
@@ -280,9 +290,13 @@ class Chat {
 
   /** Erzeugt eine Antwort auf den bisherigen Verlauf. Gibt die Fehlerart zurück (oder null). */
   async #generate(): Promise<ApiErrorKind | null> {
-    const history: ChatMessageInput[] = this.messages
-      .filter((m) => m.content.trim().length > 0 && m.status !== 'queued')
-      .map((m) => ({ role: m.role, content: m.content }));
+    const sendable = this.messages.filter(
+      (m) => (m.content.trim().length > 0 || (m.attachments?.length ?? 0) > 0) && m.status !== 'queued',
+    );
+    const model = session.connection?.model ?? '';
+    const historyFor = (images: boolean): ChatMessageInput[] => sendable.map((m) => toApiMessage(m, images));
+    let withImages = !this.#noVision.has(model) && sendable.some(hasImages);
+    if (!withImages) for (const m of sendable) if (hasImages(m) && !m.notice) m.notice = NO_VISION_NOTICE;
 
     this.messages.push({
       id: newId(),
@@ -311,16 +325,30 @@ class Chat {
         throw new ApiError(!network.online ? 'offline' : session.link === 'error' ? 'unreachable' : 'aborted');
       }
       if (abort.signal.aborted) throw new ApiError('aborted');
-      await streamChat({
-        baseUrl,
-        apiKey,
-        model: session.connection.model,
-        messages: history,
-        signal: abort.signal,
-        onDelta: (d) => {
-          msg.content += d;
-        },
-      });
+      for (;;) {
+        try {
+          await streamChat({
+            baseUrl,
+            apiKey,
+            model: session.connection.model,
+            messages: historyFor(withImages),
+            signal: abort.signal,
+            onDelta: (d) => {
+              msg.content += d;
+            },
+          });
+          break;
+        } catch (e) {
+          // Modell kann keine Bilder: merken, Hinweis an die Nachricht, Text allein nochmal senden.
+          if (e instanceof ApiError && e.kind === 'no-vision' && withImages && !msg.content) {
+            this.#noVision.add(model);
+            withImages = false;
+            for (const m of sendable) if (hasImages(m)) m.notice = NO_VISION_NOTICE;
+            continue;
+          }
+          throw e;
+        }
+      }
       msg.status = 'done';
     } catch (e) {
       const err = e instanceof ApiError ? (e as PartialApiError) : new ApiError('interrupted');

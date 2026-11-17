@@ -3,6 +3,7 @@
   import { copyText } from '../lib/clipboard';
   import { renderMarkdown } from '../lib/markdown';
   import { fold, splitMatches } from '../lib/search';
+  import { formatSize } from '../lib/attachments';
   import type { ChatMessage } from '../lib/storage/conversations';
 
   interface Props {
@@ -114,10 +115,24 @@
           <span></span><span></span><span></span>
         </span>
       {:else if mine}
+        {#if message.attachments?.length}
+          <div class="atts">
+            {#each message.attachments as a, i (i)}
+              {#if a.kind === 'image'}
+                <img class="att-img" src={a.dataUrl} alt={a.name} width={a.width} height={a.height} />
+              {:else}
+                <span class="att-file">📎 {a.name} · {formatSize(a.size)}</span>
+              {/if}
+            {/each}
+          </div>
+        {/if}
         <p class="plain">{#each userParts as part, i (i)}{#if part.mark}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}</p>
       {:else}
         <!-- eslint-disable-next-line svelte/no-at-html-tags -- mit DOMPurify bereinigt -->
         <div class="md" bind:this={body} onclick={onBodyClick} role="presentation">{@html html}</div>
+      {/if}
+      {#if message.notice}
+        <p class="state notice-note">{message.notice}</p>
       {/if}
       {#if message.status === 'queued'}
         <p class="state queued-note">⏳ Wartet auf Verbindung</p>
@@ -143,6 +158,9 @@
       {/if}
       {#if !mine && isLast && message.status !== 'streaming' && message.status !== 'error'}
         <button type="button" class="mini" onclick={onregenerate} disabled={busy}>Neu erzeugen</button>
+      {/if}
+      {#if message.notice}
+        <p class="state notice-note">{message.notice}</p>
       {/if}
       {#if message.status === 'queued'}
         <button type="button" class="mini" onclick={ondelete} aria-label="Wartende Nachricht löschen">
@@ -197,6 +215,34 @@
     border-radius: 1.3rem 1.3rem 0.4rem 1.3rem;
     background: var(--bubble-me);
     color: var(--bubble-me-text);
+  }
+  .atts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+  }
+  .att-img {
+    max-width: min(16rem, 100%);
+    max-height: 12rem;
+    width: auto;
+    height: auto;
+    border-radius: 0.7rem;
+    display: block;
+  }
+  .att-file {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.6rem;
+    background: rgb(255 255 255 / 0.18);
+    font-size: 0.9rem;
+  }
+  .notice-note {
+    color: inherit;
+    opacity: 0.95;
+  }
+  .plain:empty {
+    display: none;
   }
   [data-status='queued'] .bubble {
     background: transparent;

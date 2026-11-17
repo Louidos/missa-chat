@@ -1,3 +1,4 @@
+import { textWithFiles } from './attachments';
 import type { StoredConnection } from './storage/connection';
 import type { ChatMessage, Conversation } from './storage/conversations';
 
@@ -19,7 +20,11 @@ export function conversationToMarkdown(c: Conversation, now = new Date()): strin
   for (const m of c.messages) {
     const who = m.role === 'user' ? 'Louis' : 'Missa';
     lines.push(`## ${who} · ${fmtDate(m.createdAt)}`, '');
-    lines.push(m.content.trim() || '_(leer)_');
+    for (const a of m.attachments ?? []) {
+      if (a.kind === 'image') lines.push(`_[Bild: ${a.name}, ${a.width}×${a.height} px]_`, '');
+    }
+    lines.push(textWithFiles(m).trim() || '_(leer)_');
+    if (m.notice) lines.push('', `_(${m.notice})_`);
     if (m.status === 'stopped') lines.push('', '_(abgebrochen)_');
     if (m.status === 'error') lines.push('', '_(Antwort unvollständig)_');
     if (m.status === 'queued') lines.push('', '_(noch nicht gesendet)_');

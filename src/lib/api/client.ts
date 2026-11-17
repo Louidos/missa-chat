@@ -21,6 +21,9 @@ export interface RequestOptions {
 
 const DEFAULT_TIMEOUT = 10_000;
 
+/** Typische Fehlermeldungen von Servern, deren Modell keine Bilder versteht. */
+const VISION_ERROR = /image|vision|multi-?modal|image_url|picture|bild/i;
+
 function combinedSignal(opts: RequestOptions): {
   signal: AbortSignal;
   timeout: AbortSignal;
@@ -96,6 +99,11 @@ export async function apiFetch(
   stopTimer();
   if (res.status === 401 || res.status === 403) throw new ApiError('unauthorized', res.status);
   if (res.status === 404) throw new ApiError('not-found', res.status);
+  if ([400, 415, 422].includes(res.status)) {
+    // Antworttext nur auswerten, nie anzeigen (könnte alles Mögliche enthalten).
+    const body = (await res.text().catch(() => '')).slice(0, 4000);
+    throw new ApiError(VISION_ERROR.test(body) ? 'no-vision' : 'rejected', res.status);
+  }
   if (!res.ok) throw new ApiError('server', res.status);
   return res;
 }

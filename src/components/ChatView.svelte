@@ -4,6 +4,9 @@
   import { chat } from '../lib/chat.svelte';
   import { commandStore } from '../lib/commandStore.svelte';
   import { EMERGENCY_TEXT, expand, parseCommand } from '../lib/commands';
+  import { readFile } from '../lib/attachments';
+  import { MAX_ATTACHMENTS } from '../config/limits';
+  import type { Attachment } from '../lib/storage/conversations';
   import { network } from '../lib/network.svelte';
   import { session } from '../lib/session.svelte';
   import Composer from './Composer.svelte';
@@ -26,6 +29,50 @@
   let loadError = $state('');
   let drawer = $state(false);
   let commandHint = $state('');
+  let pending = $state<Attachment[]>([]);
+  let fileErrors = $state<string[]>([]);
+  let busyFiles = $state(false);
+  let dragging = $state(false);
+  /** Wird erfüllt, sobald alle gerade geladenen Anhänge fertig sind. */
+  let filesReady: Promise<void> = Promise.resolve();
+
+  function addFiles(files: File[]): Promise<void> {
+    const before = filesReady;
+    filesReady = before.then(() => loadFiles(files));
+    return filesReady;
+  }
+
+  async function loadFiles(files: File[]) {
+    fileErrors = [];
+    busyFiles = true;
+    try {
+      for (const file of files) {
+        if (pending.length >= MAX_ATTACHMENTS) {
+          fileErrors = [...fileErrors, `Höchstens ${MAX_ATTACHMENTS} Anhänge pro Nachricht.`];
+          break;
+        }
+        const r = await readFile(file);
+        if (r.ok) pending = [...pending, r.attachment];
+        else fileErrors = [...fileErrors, r.error];
+      }
+    } finally {
+      busyFiles = false;
+      composer?.focus();
+    }
+  }
+
+  function ondragover(e: DragEvent) {
+    if (!e.dataTransfer?.types.includes('Files')) return;
+    e.preventDefault();
+    dragging = true;
+  }
+
+  function ondrop(e: DragEvent) {
+    if (!e.dataTransfer?.files.length) return;
+    e.preventDefault();
+    dragging = false;
+    void addFiles([...e.dataTransfer.files]);
+  }
   let confirmEmergency = $state(false);
   let emergency = $state<{ state: 'sending' | 'done' | 'error' | 'queued'; text: string } | null>(null);
   let searchOpen = $state(false);
@@ -59,10 +106,15 @@
       void commandStore.recordUse(command.name);
       text = expanded;
     }
-    void chat.send(text);
+    const files = pending;
+    pending = [];
+    fileErrors = [];
+    void chat.send(text, files);
   }
 
-  function submit() {
+  async function submit() {
+    // Enter während ein Anhang noch lädt: erst fertig laden, dann senden.
+    if (busyFiles) await filesReady;
     const text = draft;
     draft = '';
     if (editing) {
@@ -133,7 +185,17 @@
 {#if drawer}
   <button type="button" class="scrim" aria-label="Gesprächsliste schliessen" onclick={() => (drawer = false)}></button>
 {/if}
-<div class="chat">
+<div
+  class="chat"
+  class:dragging
+  role="region"
+  aria-label="Chat"
+  {ondragover}
+  ondragleave={(e) => {
+    if (e.currentTarget === e.target) dragging = false;
+  }}
+  {ondrop}
+>
   <header class="topbar">
     <button
       type="button"
@@ -201,6 +263,8 @@
   <MessageList onedit={startEdit} />
 
   {#if commandHint}<p class="command-hint" role="status">{commandHint}</p>{/if}
+  {#each fileErrors as err (err)}<p class="alert file-error" role="alert">{err}</p>{/each}
+  {#if dragging}<div class="dropzone" aria-hidden="true">Datei hier ablegen</div>{/if}
   <QuickBar {draft} onsend={(t) => sendText(t)} onfill={(t) => ((draft = t), composer?.focus())} />
 
   <Composer
@@ -212,6 +276,10 @@
     onsubmit={submit}
     onstop={() => chat.stop()}
     oncanceledit={cancelEdit}
+    attachments={pending}
+    {busyFiles}
+    onfiles={(f) => addFiles(f)}
+    onremove={(i) => (pending = pending.filter((_, j) => j !== i))}
   />
 </div>
 </div>
@@ -353,6 +421,22 @@
   .emergency-result p {
     margin: 0.4rem 0;
     white-space: pre-wrap;
+  }
+  .file-error {
+    margin-top: 0.4rem;
+  }
+  .dropzone {
+    position: absolute;
+    inset: 0.5rem;
+    z-index: 10;
+    display: grid;
+    place-items: center;
+    border: 3px dashed var(--accent);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    font-size: 1.3rem;
+    font-weight: 700;
+    pointer-events: none;
   }
   .command-hint {
     margin: 0.25rem 0 0;

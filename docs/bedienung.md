@@ -43,7 +43,22 @@ Erlaubt sind nur `https://`-Adressen. Ausnahme: `http://localhost` zum Entwickel
 - Der Verlauf wird lokal gespeichert und übersteht Neuladen. Mehrere Gespräche kommen
   mit einer späteren Version.
 
-### Schnellbefehle und Notfall-Knopf
+### Bilder und Dateien anhängen
+
+- **Bilder:** Büroklammer-Knopf, ins Fenster ziehen (Drag & Drop) oder einen Screenshot
+  mit **Ctrl+V** einfügen. Vor dem Senden steht eine Vorschau, **×** entfernt sie.
+  Bilder werden vor dem Senden auf höchstens **1600 px** verkleinert und im
+  OpenAI-Format (`image_url` als data-URL) an Missa geschickt.
+- **Kann das Modell keine Bilder**, meldet die API das. Die App zeigt dann an der
+  Nachricht „Bild nicht gesendet: Dieses Modell kann leider keine Bilder ansehen“ und
+  schickt den Text trotzdem. Danach probiert sie es mit diesem Modell gar nicht mehr mit
+  Bildern.
+- **Textdateien** (.txt, .md, .log, .py, .json, .yaml, .sh, .csv … bis **200 KB**) werden
+  mit Dateinamen als Text in die Nachricht eingefügt. Grössere oder andere Dateien
+  lehnt die App mit Hinweis ab.
+- Bis zu 6 Anhänge pro Nachricht. Die Grenzen stehen in `src/config/limits.ts`.
+
+## Schnellbefehle und Notfall-Knopf
 
 Tippe **/** ins Eingabefeld: Eine Liste mit Befehlen erscheint (Pfeiltasten, Enter oder
 Tab wählt, Esc schliesst). Jeder Befehl wird als normale Nachricht an Missa gesendet:
@@ -122,6 +137,21 @@ versuchen“).
 
 Gibt es eine **neue Version**, erscheint oben „Neue Version verfügbar“ mit
 **Neu laden**.
+
+## Bilder und Dateien anhängen
+
+- **Bilder:** Büroklammer-Knopf, ins Fenster ziehen (Drag & Drop) oder einen Screenshot
+  mit **Ctrl+V** einfügen. Vor dem Senden steht eine Vorschau, **×** entfernt sie.
+  Bilder werden vor dem Senden auf höchstens **1600 px** verkleinert und im
+  OpenAI-Format (`image_url` als data-URL) an Missa geschickt.
+- **Kann das Modell keine Bilder**, meldet die API das. Die App zeigt dann an der
+  Nachricht „Bild nicht gesendet: Dieses Modell kann leider keine Bilder ansehen“ und
+  schickt den Text trotzdem. Danach probiert sie es mit diesem Modell gar nicht mehr mit
+  Bildern.
+- **Textdateien** (.txt, .md, .log, .py, .json, .yaml, .sh, .csv … bis **200 KB**) werden
+  mit Dateinamen als Text in die Nachricht eingefügt. Grössere oder andere Dateien
+  lehnt die App mit Hinweis ab.
+- Bis zu 6 Anhänge pro Nachricht. Die Grenzen stehen in `src/config/limits.ts`.
 
 ## Schnellbefehle und Notfall-Knopf
 
