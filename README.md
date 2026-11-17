@@ -25,10 +25,17 @@ npm ci
 
 ### Windows-App
 
-Die Windows-App wird mit `npm run tauri:build` gebaut (auf Windows, mit Rust) und als
-`setup.exe` installiert – ohne Admin-Rechte, danach steht „Missa“ im Startmenü. Die CI
-baut die `setup.exe` bei jedem Lauf mit. Details, Unterschiede zum Browser und wo die
-Daten liegen: [docs/windows-app.md](docs/windows-app.md).
+1. Beim neuesten [Release](https://github.com/Louidos/missa-chat/releases) die Datei
+   `Missa_X.Y.Z_x64-setup.exe` herunterladen (daneben liegt die SHA-256-Prüfsumme).
+2. Doppelklicken und installieren – ohne Admin-Rechte, danach steht „Missa“ im Startmenü.
+3. Windows zeigt beim ersten Mal eine **SmartScreen-Warnung**, weil die exe nicht
+   signiert ist: **Weitere Informationen** → **Trotzdem ausführen**.
+
+Aktualisieren: neue `setup.exe` einfach darüber installieren, die Daten bleiben.
+Still installieren: `Missa_X.Y.Z_x64-setup.exe /S`. Deinstallieren: Einstellungen →
+Apps → Missa. Selbst bauen geht mit `npm run tauri:build` (auf Windows, mit Rust).
+Details, Unterschiede zum Browser und wo die Daten liegen:
+[docs/windows-app.md](docs/windows-app.md).
 
 ## Start
 
@@ -72,7 +79,7 @@ Fertige App ausliefern mit Docker (Caddy): `npm run build`, dann in `deploy/`
 | `tests/unit/`      | Unit-Tests (Vitest)                                          |
 | `tests/e2e/`       | Ende-zu-Ende-Tests (Playwright)                              |
 | `tests/mock-api/`  | Mock-Server, der die Missa-API nachahmt (inkl. Streaming)    |
-| `docs/`            | Doku (Installation, Hosting, Caddy/CORS, Bedienung)          |
+| `docs/`            | Doku (Installation, Hosting, Caddy/CORS, Bedienung, Windows-App) |
 | `deploy/`          | compose.yaml + Caddyfile zum Ausliefern der fertigen App     |
 | `src-tauri/`       | Hülle der Windows-App (Tauri 2, Rust): Fenster, Installer    |
 
@@ -104,6 +111,7 @@ freigeben – für die Windows-App zusätzlich `http://tauri.localhost`:
 - [x] Bilder, Screenshots (Ctrl+V) und Textdateien anhängen
 - [x] Extras: Vorlesen mit lokalen Stimmen, Benachrichtigungen, Nerd-Statistik, Tastenkürzel, Entwürfe
 - [x] Windows-App mit kleinem Installer (Tauri), eigenes Fenster, merkt sich Grösse und Position
+- [x] `setup.exe` mit Prüfsumme hängt automatisch an jedem Release
 
 Änderungen stehen im [CHANGELOG](CHANGELOG.md).
 

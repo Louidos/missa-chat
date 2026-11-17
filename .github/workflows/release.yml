@@ -1,7 +1,11 @@
 name: Release
 
-# Erstellt beim Pushen eines Tags vX.Y.Z automatisch das GitHub-Release
-# mit dem passenden Abschnitt aus CHANGELOG.md.
+# Beim Pushen eines Tags vX.Y.Z:
+# 1. prüft, ob Tag, package.json und die Versionen der Windows-App zusammenpassen,
+# 2. erstellt das GitHub-Release mit dem passenden Abschnitt aus CHANGELOG.md,
+# 3. baut die Windows-App und hängt setup.exe samt SHA-256-Prüfsumme an.
+# Wiederholbar: „Re-run failed jobs“ legt kein zweites Release an und ersetzt
+# bereits hochgeladene Dateien.
 on:
   push:
     tags: ['v*.*.*']
@@ -18,17 +22,62 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Version aus Tag und package.json vergleichen
-        run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          PKG="$(node -p "require('./package.json').version")"
-          if [ "$TAG" != "$PKG" ]; then
-            echo "Tag $TAG passt nicht zu package.json $PKG" >&2
-            exit 1
-          fi
+      - name: Versionen mit dem Tag vergleichen
+        run: node .github/scripts/check-version.mjs "$GITHUB_REF_NAME"
       - name: CHANGELOG-Abschnitt lesen
         run: node .github/scripts/changelog-section.mjs "${GITHUB_REF_NAME#v}" > release-notes.md
-      - name: Release erstellen
+      - name: Release erstellen (falls noch nicht vorhanden)
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" --title "${GITHUB_REF_NAME#v}" --notes-file release-notes.md --verify-tag
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME gibt es schon – nichts zu tun."
+          else
+            gh release create "$GITHUB_REF_NAME" --title "${GITHUB_REF_NAME#v}" --notes-file release-notes.md --verify-tag
+          fi
+
+  windows:
+    name: Windows-Installer anhängen
+    needs: release
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Versionen mit dem Tag vergleichen
+        shell: bash
+        run: node .github/scripts/check-version.mjs "$GITHUB_REF_NAME"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - run: npm ci
+      - run: npm run tauri:build -- --ci
+      - name: setup.exe und Prüfsumme vorbereiten
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          NAME="Missa_${VERSION}_x64-setup.exe"
+          SRC="src-tauri/target/release/bundle/nsis/$NAME"
+          if [ ! -f "$SRC" ]; then
+            echo "::error::$NAME wurde nicht gebaut." >&2
+            ls src-tauri/target/release/bundle/nsis/ >&2 || true
+            exit 1
+          fi
+          mkdir -p upload
+          cp "$SRC" "upload/$NAME"
+          (cd upload && sha256sum "$NAME" > "$NAME.sha256")
+          SIZE=$(stat -c %s "upload/$NAME")
+          echo "$NAME: $((SIZE / 1024)) KB, SHA-256 $(cut -d' ' -f1 "upload/$NAME.sha256")" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$SIZE" -gt $((15 * 1024 * 1024)) ]; then
+            echo "::error::$NAME ist grösser als 15 MB." >&2
+            exit 1
+          fi
+      - name: Ans Release hängen
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" upload/* --clobber

@@ -10,6 +10,7 @@ die Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 ### Hinzugefügt
 
 - Missa-Chat gibt es als Windows-App: kleine `setup.exe`, Installation ohne Admin-Rechte, eigenes Fenster, startet schnell und merkt sich Grösse und Position (#23)
+- Die Windows-`setup.exe` hängt ab jetzt an jedem Release zum direkten Herunterladen (#27)
 
 ### Behoben
 
