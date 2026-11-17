@@ -2,7 +2,7 @@
 name = "missa-chat"
 # Muss zur Version in package.json passen (geprüft in tests/unit/desktop.test.ts und
 # beim Release). Die Version im Installer kommt aus package.json (tauri.conf.json).
-version = "0.3.0"
+version = "0.4.0"
 description = "Missa-Chat als Windows-App"
 license = "MIT"
 edition = "2021"
