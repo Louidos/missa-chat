@@ -5,7 +5,7 @@ API-Adresse und Key eingeben, und man hat ein schönes Chat-Fenster. Die ganze L
 bleibt auf dem Server (missa-core). Läuft im Browser am Laptop, lässt sich auf dem
 Handy als PWA installieren und gibt es als Windows-App mit kleiner `setup.exe`.
 
-**Version:** 0.3.0 – alle geplanten Funktionen: Look, Verlauf, Schnellbefehle, Anhänge, Extras
+**Version:** 0.4.0 – zusätzlich als Windows-App mit kleinem Installer
 
 ## Grundsätze
 
