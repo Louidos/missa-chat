@@ -1,11 +1,16 @@
 import { ApiError, streamChat, type ApiErrorKind, type ChatMessageInput, type PartialApiError } from './api';
+import { history } from './history.svelte';
 import { network } from './network.svelte';
 import { session } from './session.svelte';
 import {
+  deleteConversation,
+  getConversation,
   loadCurrentConversation,
   newConversation,
   newId,
+  putConversations,
   saveConversation,
+  setCurrentConversation,
   type ChatMessage,
   type Conversation,
 } from './storage/conversations';
@@ -26,6 +31,10 @@ class Chat {
   conversation = $state<Conversation>(newConversation());
   streaming = $state(false);
   loaded = $state(false);
+  /** Suchbegriff, der im offenen Gespräch hervorgehoben wird (aus der Suche). */
+  highlight = $state('');
+  /** Nachricht, zu der gescrollt werden soll (aus der Suche). */
+  focusMessageId = $state<string | null>(null);
 
   #abort: AbortController | null = null;
   #flushing = false;
@@ -53,6 +62,11 @@ class Chat {
 
   async load(): Promise<void> {
     const c = await loadCurrentConversation();
+    this.#show(c);
+    void history.refresh();
+  }
+
+  #show(c: Conversation): void {
     // Eine beim Schliessen laufende Antwort gilt als abgebrochen.
     for (const m of c.messages) if (m.status === 'streaming') m.status = 'stopped';
     this.conversation = c;
@@ -61,23 +75,97 @@ class Chat {
     if (this.queued.length > 0 && session.link === 'connected') void this.flushQueue();
   }
 
+  /** Anderes Gespräch öffnen (eine laufende Antwort wird vorher gestoppt). */
+  async open(id: string, opts: { highlight?: string; focusMessageId?: string } = {}): Promise<void> {
+    if (id === this.conversation.id) {
+      this.highlight = opts.highlight ?? '';
+      this.focusMessageId = opts.focusMessageId ?? null;
+      return;
+    }
+    this.stop();
+    const c = await getConversation(id);
+    if (!c) return;
+    await setCurrentConversation(id);
+    this.highlight = opts.highlight ?? '';
+    this.focusMessageId = opts.focusMessageId ?? null;
+    this.#show(c);
+  }
+
+  /** Neues, leeres Gespräch (wird erst mit der ersten Nachricht gespeichert). */
+  async startNew(): Promise<void> {
+    this.stop();
+    this.highlight = '';
+    this.focusMessageId = null;
+    this.conversation = newConversation();
+    this.loaded = true;
+    await setCurrentConversation(null);
+    this.#updateRetry();
+  }
+
+  async rename(id: string, title: string): Promise<void> {
+    const t = title.trim().slice(0, 120);
+    if (!t) return;
+    await this.#patch(id, { title: t, customTitle: true });
+  }
+
+  async togglePin(id: string): Promise<void> {
+    const c = id === this.conversation.id ? this.conversation : await getConversation(id);
+    if (!c) return;
+    await this.#patch(id, { pinned: !c.pinned });
+  }
+
+  async remove(id: string): Promise<void> {
+    if (id === this.conversation.id) {
+      this.stop();
+      await deleteConversation(id);
+      history.remove(id);
+      const next = history.items[0];
+      if (next) await this.open(next.id);
+      else await this.startNew();
+    } else {
+      await deleteConversation(id);
+      history.remove(id);
+    }
+  }
+
+  async #patch(id: string, patch: Partial<Conversation>): Promise<void> {
+    if (id === this.conversation.id) {
+      Object.assign(this.conversation, patch);
+      if (this.conversation.messages.length > 0) await this.#save(false);
+      return;
+    }
+    const c = await getConversation(id);
+    if (!c) return;
+    const updated = { ...c, ...patch };
+    await putConversations([updated]);
+    history.upsert(updated);
+  }
+
   /** Nach Abmelden/Sperren: laufende Antwort stoppen, Gespräch aus dem Speicher nehmen. */
   reset(): void {
     this.stop();
     this.conversation = newConversation();
     this.loaded = false;
+    this.highlight = '';
+    this.focusMessageId = null;
+    history.clear();
     this.#updateRetry();
   }
 
-  async #save(): Promise<void> {
-    this.conversation.updatedAt = new Date().toISOString();
-    await saveConversation($state.snapshot(this.conversation) as Conversation);
+  async #save(touch = true): Promise<void> {
+    if (touch) this.conversation.updatedAt = new Date().toISOString();
+    const snap = $state.snapshot(this.conversation) as Conversation;
+    await saveConversation(snap);
+    history.upsert(snap);
   }
 
   async send(text: string): Promise<void> {
     const content = text.trim();
     if (!content || this.streaming) return;
-    if (this.messages.length === 0) this.conversation.title = titleFrom(content);
+    if (this.messages.length === 0 && !this.conversation.customTitle) {
+      this.conversation.title = titleFrom(content);
+    }
+    this.highlight = '';
     const msg: ChatMessage = {
       id: newId(),
       role: 'user',
@@ -152,7 +240,7 @@ class Chat {
     const idx = this.lastUserIndex;
     if (!content || idx < 0 || this.streaming) return;
     this.messages.splice(idx);
-    if (idx === 0) this.conversation.title = titleFrom(content);
+    if (idx === 0 && !this.conversation.customTitle) this.conversation.title = titleFrom(content);
     await this.send(content);
   }
 

@@ -84,11 +84,15 @@ body {
   min-width: 320px;
 }
 #app {
-  max-width: 48rem;
+  max-width: 80rem;
   margin: 0 auto;
   padding: 0 1rem;
 }
-#app > .card {
+.narrow {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+.narrow > .card {
   margin-top: 1rem;
 }
 .sr-only {
@@ -132,6 +136,7 @@ button {
 input[type="url"],
 input[type="text"],
 input[type="password"],
+input[type="search"],
 select {
   width: 100%;
   min-height: 2.75rem;
@@ -484,4 +489,11 @@ code {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+mark {
+  background: #ffe08a;
+  color: #2b2420;
+  border-radius: 0.2rem;
+  padding: 0 0.1rem;
 }

@@ -33,14 +33,28 @@
     const last = chat.messages.at(-1);
     void last?.content;
     void last?.status;
+    void chat.conversation.id;
     const force = count > prevCount && chat.messages.some((m, i) => i >= prevCount && m.role === 'user');
     prevCount = count;
+    if (untrack(() => chat.focusMessageId)) return;
     if (force || untrack(() => atBottom)) {
       void tick().then(() => {
         scrollToBottom();
         atBottom = true;
       });
     }
+  });
+
+  // Zur Nachricht aus der Suche springen.
+  $effect(() => {
+    const id = chat.focusMessageId;
+    if (!id) return;
+    void tick().then(() => {
+      const target = document.getElementById(`msg-${id}`);
+      target?.scrollIntoView({ block: 'center' });
+      measure();
+      chat.focusMessageId = null;
+    });
   });
 </script>
 
@@ -61,6 +75,7 @@
           busy={chat.streaming}
           onregenerate={() => chat.regenerate()}
           ondelete={() => chat.deleteQueued(message.id)}
+          highlight={chat.highlight}
           {onedit}
         />
       {/each}

@@ -30,30 +30,34 @@
 <UpdateBanner />
 
 {#if loadError}
-  <section class="card"><p class="alert" role="alert">{loadError}</p></section>
+  <div class="narrow"><section class="card"><p class="alert" role="alert">{loadError}</p></section></div>
 {:else if session.state === 'loading'}
   <p class="center muted" role="status">Lade …</p>
 {:else if session.state === 'setup'}
-  <section class="card">
-    <h1>Mit Missa verbinden</h1>
-    <p class="muted">Adresse und Key bleiben nur auf diesem Gerät gespeichert.</p>
-    <ConnectForm
-      mode="setup"
-      ondone={(r) => {
-        notice = r.warning ?? '';
+  <div class="narrow">
+    <section class="card">
+      <h1>Mit Missa verbinden</h1>
+      <p class="muted">Adresse und Key bleiben nur auf diesem Gerät gespeichert.</p>
+      <ConnectForm
+        mode="setup"
+        ondone={(r) => {
+          notice = r.warning ?? '';
+          view = 'home';
+        }}
+      />
+    </section>
+  </div>
+{:else if session.state === 'locked'}
+  <div class="narrow"><UnlockView /></div>
+{:else if view === 'settings'}
+  <div class="narrow">
+    <SettingsView
+      onclose={(n) => {
+        notice = n ?? '';
         view = 'home';
       }}
     />
-  </section>
-{:else if session.state === 'locked'}
-  <UnlockView />
-{:else if view === 'settings'}
-  <SettingsView
-    onclose={(n) => {
-      notice = n ?? '';
-      view = 'home';
-    }}
-  />
+  </div>
 {:else}
   <ChatView {notice} onsettings={() => ((notice = ''), (view = 'settings'))} />
 {/if}

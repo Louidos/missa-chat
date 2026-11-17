@@ -2,6 +2,7 @@
   import { avatar } from '../lib/avatar.svelte';
   import { copyText } from '../lib/clipboard';
   import { renderMarkdown } from '../lib/markdown';
+  import { fold, splitMatches } from '../lib/search';
   import type { ChatMessage } from '../lib/storage/conversations';
 
   interface Props {
@@ -12,8 +13,12 @@
     onregenerate: () => void;
     onedit: () => void;
     ondelete: () => void;
+    /** Suchbegriff, der hervorgehoben wird. */
+    highlight?: string;
   }
-  let { message, isLast, isLastUser, busy, onregenerate, onedit, ondelete }: Props = $props();
+  let { message, isLast, isLastUser, busy, onregenerate, onedit, ondelete, highlight = '' }: Props =
+    $props();
+  const userParts = $derived(splitMatches(message.content, highlight));
 
   const mine = $derived(message.role === 'user');
   const html = $derived(mine ? '' : renderMarkdown(message.content));
@@ -50,6 +55,29 @@
     }
   });
 
+  // Suchtreffer in Missas (bereits bereinigtem) Text hervorheben – nur Textknoten.
+  $effect(() => {
+    void html;
+    const q = fold(highlight.trim());
+    if (!body || q.length < 2) return;
+    const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+    const nodes: Text[] = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode as Text);
+    for (const node of nodes) {
+      const parts = splitMatches(node.data, highlight);
+      if (!parts.some((p) => p.mark)) continue;
+      const frag = document.createDocumentFragment();
+      for (const p of parts) {
+        if (p.mark) {
+          const m = document.createElement('mark');
+          m.textContent = p.text;
+          frag.append(m);
+        } else frag.append(p.text);
+      }
+      node.replaceWith(frag);
+    }
+  });
+
   async function onBodyClick(e: MouseEvent) {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button.copy-code');
     if (!btn) return;
@@ -68,7 +96,7 @@
   }
 </script>
 
-<li class="msg" class:mine data-role={message.role} data-status={message.status}>
+<li class="msg" class:mine id="msg-{message.id}" data-role={message.role} data-status={message.status}>
   {#if !mine}
     <img
       class="avatar"
@@ -86,7 +114,7 @@
           <span></span><span></span><span></span>
         </span>
       {:else if mine}
-        <p class="plain">{message.content}</p>
+        <p class="plain">{#each userParts as part, i (i)}{#if part.mark}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}</p>
       {:else}
         <!-- eslint-disable-next-line svelte/no-at-html-tags -- mit DOMPurify bereinigt -->
         <div class="md" bind:this={body} onclick={onBodyClick} role="presentation">{@html html}</div>

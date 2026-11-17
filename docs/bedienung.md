@@ -43,7 +43,26 @@ Erlaubt sind nur `https://`-Adressen. Ausnahme: `http://localhost` zum Entwickel
 - Der Verlauf wird lokal gespeichert und übersteht Neuladen. Mehrere Gespräche kommen
   mit einer späteren Version.
 
-### Darstellung von Missas Antworten
+### Gespräche, Suche, Export
+
+- **Seitenleiste** (am Laptop links, am Handy über ☰ ausklappbar): alle Gespräche,
+  angeheftete oben, dann die zuletzt benutzten. **+ Neues Gespräch** startet ein leeres
+  Gespräch, es erscheint in der Liste, sobald die erste Nachricht drin ist.
+- Der **Titel** entsteht automatisch aus der ersten Nachricht. Über **⋯** neben einem
+  Gespräch: **Anheften/Lösen**, **Umbenennen**, **Als Markdown exportieren**,
+  **Löschen …** (mit Rückfrage).
+- **Suche:** **Ctrl+K** (Mac: ⌘K) oder die Lupe. Sucht ab 2 Zeichen in allen Gesprächen,
+  ohne Gross-/Kleinschreibung. Ein Klick (oder Enter für den ersten Treffer) öffnet das
+  Gespräch, springt zur Nachricht und hebt den Begriff gelb hervor.
+- **Einstellungen → Daten:** „Alles exportieren (JSON)“ sichert alle Gespräche,
+  Adressen und Einstellungen – **ohne API-Key**. „Importieren …“ liest so eine Datei
+  wieder ein (z. B. auf einem anderen Gerät).
+
+Der Verlauf liegt nur lokal im Browser, weil die Missa-API keinen Verlaufs-Endpunkt hat
+(siehe [api.md](api.md)). Wartende Offline-Nachrichten gehen raus, wenn ihr Gespräch
+offen ist.
+
+## Darstellung von Missas Antworten
 
 Antworten werden als Markdown dargestellt (Listen, Tabellen, Links, Code). Code wird
 lokal hervorgehoben (highlight.js, mitgebaut). Weil Antworten **fremder Inhalt** sind,
@@ -74,6 +93,25 @@ versuchen“).
 
 Gibt es eine **neue Version**, erscheint oben „Neue Version verfügbar“ mit
 **Neu laden**.
+
+## Gespräche, Suche, Export
+
+- **Seitenleiste** (am Laptop links, am Handy über ☰ ausklappbar): alle Gespräche,
+  angeheftete oben, dann die zuletzt benutzten. **+ Neues Gespräch** startet ein leeres
+  Gespräch, es erscheint in der Liste, sobald die erste Nachricht drin ist.
+- Der **Titel** entsteht automatisch aus der ersten Nachricht. Über **⋯** neben einem
+  Gespräch: **Anheften/Lösen**, **Umbenennen**, **Als Markdown exportieren**,
+  **Löschen …** (mit Rückfrage).
+- **Suche:** **Ctrl+K** (Mac: ⌘K) oder die Lupe. Sucht ab 2 Zeichen in allen Gesprächen,
+  ohne Gross-/Kleinschreibung. Ein Klick (oder Enter für den ersten Treffer) öffnet das
+  Gespräch, springt zur Nachricht und hebt den Begriff gelb hervor.
+- **Einstellungen → Daten:** „Alles exportieren (JSON)“ sichert alle Gespräche,
+  Adressen und Einstellungen – **ohne API-Key**. „Importieren …“ liest so eine Datei
+  wieder ein (z. B. auf einem anderen Gerät).
+
+Der Verlauf liegt nur lokal im Browser, weil die Missa-API keinen Verlaufs-Endpunkt hat
+(siehe [api.md](api.md)). Wartende Offline-Nachrichten gehen raus, wenn ihr Gespräch
+offen ist.
 
 ## Darstellung
 

@@ -3,6 +3,7 @@
   import AppearanceSettings from './AppearanceSettings.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import ConnectForm from './ConnectForm.svelte';
+  import DataSettings from './DataSettings.svelte';
 
   interface Props {
     onclose: (notice?: string) => void;
@@ -41,6 +42,8 @@
   {/if}
 
   <AppearanceSettings />
+
+  <DataSettings />
 
   <section class="card">
     <h2>Abmelden</h2>
