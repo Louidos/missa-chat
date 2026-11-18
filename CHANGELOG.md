@@ -7,6 +7,10 @@ die Versionen folgen [Semantic Versioning](https://semver.org/lang/de/).
 
 ## Unveröffentlicht
 
+### Behoben
+
+- Die Windows-`setup.exe` wird jetzt zuverlässig ans Release gehängt, und die Release-Notizen werden auch dann gesetzt, wenn das Release schon angelegt war (#30)
+
 ## 0.4.0 – 2026-11-17
 
 ### Hinzugefügt

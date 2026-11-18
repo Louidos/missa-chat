@@ -4,7 +4,8 @@
 // Aufruf: node .github/scripts/check-version.mjs [X.Y.Z]
 import { readFileSync } from 'node:fs';
 
-const read = (p) => readFileSync(new URL(`../../${p}`, import.meta.url), 'utf8');
+// Zeilenenden vereinheitlichen: Unter Windows kann Git mit CRLF auschecken.
+const read = (p) => readFileSync(new URL(`../../${p}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 const errors = [];
 
 const pkg = JSON.parse(read('package.json')).version;
