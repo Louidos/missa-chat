@@ -189,5 +189,10 @@ Beim Pushen eines Tags `vX.Y.Z` läuft `.github/workflows/release.yml`:
 3. Baut auf Windows die App und hängt `Missa_X.Y.Z_x64-setup.exe` und
    `Missa_X.Y.Z_x64-setup.exe.sha256` ans Release.
 
-Schlägt Schritt 3 fehl, im Actions-Tab „Re-run failed jobs“ wählen: Das Release wird
-nicht doppelt angelegt, und schon hochgeladene Dateien werden ersetzt.
+Gibt es das Release schon (z. B. über die GitHub-Oberfläche angelegt), wird kein zweites
+erstellt; der Workflow setzt nur die Notizen aus dem CHANGELOG.
+
+Schlägt Schritt 3 fehl, im Actions-Tab „Re-run failed jobs“ wählen: Schon hochgeladene
+Dateien werden ersetzt. Lag der Fehler am Workflow selbst, nach der Korrektur auf `main`:
+Actions → Release → **Run workflow** → Tag eingeben (z. B. `v0.4.0`). Das baut den Stand
+des Tags mit dem korrigierten Workflow und hängt die Dateien an; der Tag wird nicht verschoben.

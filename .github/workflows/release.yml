@@ -2,16 +2,28 @@ name: Release
 
 # Beim Pushen eines Tags vX.Y.Z:
 # 1. prüft, ob Tag, package.json und die Versionen der Windows-App zusammenpassen,
-# 2. erstellt das GitHub-Release mit dem passenden Abschnitt aus CHANGELOG.md,
+# 2. erstellt das GitHub-Release mit dem passenden Abschnitt aus CHANGELOG.md
+#    (gibt es das Release schon, z. B. über die GitHub-Oberfläche angelegt, werden
+#    nur die Notizen gesetzt – kein zweites Release),
 # 3. baut die Windows-App und hängt setup.exe samt SHA-256-Prüfsumme an.
-# Wiederholbar: „Re-run failed jobs“ legt kein zweites Release an und ersetzt
-# bereits hochgeladene Dateien.
+# Wiederholbar: „Re-run failed jobs“ ersetzt bereits hochgeladene Dateien.
+# Von Hand für einen bestehenden Tag (z. B. nach einer Korrektur am Workflow):
+# Actions → Release → „Run workflow“ → Tag eingeben. Gebaut wird der Stand des Tags.
 on:
   push:
     tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Bestehender Tag, z. B. v0.4.0'
+        required: true
+        type: string
 
 permissions:
   contents: write
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   release:
@@ -19,21 +31,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.TAG }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Versionen mit dem Tag vergleichen
-        run: node .github/scripts/check-version.mjs "$GITHUB_REF_NAME"
+        run: node .github/scripts/check-version.mjs "$TAG"
       - name: CHANGELOG-Abschnitt lesen
-        run: node .github/scripts/changelog-section.mjs "${GITHUB_REF_NAME#v}" > release-notes.md
-      - name: Release erstellen (falls noch nicht vorhanden)
+        run: node .github/scripts/changelog-section.mjs "${TAG#v}" > release-notes.md
+      - name: Release erstellen oder Notizen setzen
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            echo "Release $GITHUB_REF_NAME gibt es schon – nichts zu tun."
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG gibt es schon – setze nur die Notizen aus dem CHANGELOG."
+            gh release edit "$TAG" --title "${TAG#v}" --notes-file release-notes.md
           else
-            gh release create "$GITHUB_REF_NAME" --title "${GITHUB_REF_NAME#v}" --notes-file release-notes.md --verify-tag
+            gh release create "$TAG" --title "${TAG#v}" --notes-file release-notes.md --verify-tag
           fi
 
   windows:
@@ -42,14 +57,19 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
+      # Zeilenenden nicht in CRLF umwandeln: Skripte und Build sehen dieselben Dateien
+      # wie unter Linux (sonst findet die Versionsprüfung Cargo.lock nicht).
+      - run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.TAG }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - name: Versionen mit dem Tag vergleichen
         shell: bash
-        run: node .github/scripts/check-version.mjs "$GITHUB_REF_NAME"
+        run: node .github/scripts/check-version.mjs "$TAG"
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -59,7 +79,7 @@ jobs:
       - name: setup.exe und Prüfsumme vorbereiten
         shell: bash
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${TAG#v}"
           NAME="Missa_${VERSION}_x64-setup.exe"
           SRC="src-tauri/target/release/bundle/nsis/$NAME"
           if [ ! -f "$SRC" ]; then
@@ -80,4 +100,4 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$GITHUB_REF_NAME" upload/* --clobber
+        run: gh release upload "$TAG" upload/* --clobber

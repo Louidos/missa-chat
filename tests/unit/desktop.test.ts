@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, existsSync, rmSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, existsSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { build } from 'vite';
@@ -90,6 +90,25 @@ describe('Versionsprüfung fürs Release', () => {
     const r = run('v99.0.0');
     expect(r.status).toBe(1);
     expect(r.stderr).toContain(`Tag v99.0.0 passt nicht zu package.json (${version})`);
+  });
+
+  it('funktioniert auch mit Windows-Zeilenenden (CRLF)', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'missa-crlf-'));
+    try {
+      mkdirSync(join(dir, '.github/scripts'), { recursive: true });
+      mkdirSync(join(dir, 'src-tauri'));
+      copyFileSync(join(root, '.github/scripts/check-version.mjs'), join(dir, '.github/scripts/check-version.mjs'));
+      for (const f of ['package.json', 'package-lock.json', 'src-tauri/tauri.conf.json', 'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock']) {
+        writeFileSync(join(dir, f), read(f).replace(/\r?\n/g, '\r\n'));
+      }
+      const r = spawnSync(process.execPath, [join(dir, '.github/scripts/check-version.mjs'), `v${version}`], {
+        encoding: 'utf8',
+      });
+      expect(r.stderr).toBe('');
+      expect(r.status).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 
